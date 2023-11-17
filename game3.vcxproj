@@ -148,13 +148,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\game3.cpp" />
+    <ClCompile Include="src\objManager.h" />
+    <ClCompile Include="src\obj\animatedObj.h" />
+    <ClCompile Include="src\obj\ghost.cpp" />
     <ClCompile Include="src\obj\pacman.cpp" />
     <ClCompile Include="src\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\game.h" />
+    <ClInclude Include="src\gameStatus.h" />
+    <ClInclude Include="src\ghostManager.h" />
     <ClInclude Include="src\global.h" />
-    <ClInclude Include="src\gameMap.h" />
+    <ClInclude Include="src\mapManager.h" />
     <ClInclude Include="src\obj\base.h" />
+    <ClInclude Include="src\obj\ghost.h" />
     <ClInclude Include="src\obj\pacman.h" />
     <ClInclude Include="src\obj\power.h" />
     <ClInclude Include="src\obj\wall.h" />

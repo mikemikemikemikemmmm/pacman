@@ -18,10 +18,19 @@
     <ClCompile Include="src\game3.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
-    <ClCompile Include="src\obj\pacman.cpp">
+    <ClCompile Include="src\utils.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
-    <ClCompile Include="src\utils.cpp">
+    <ClCompile Include="src\objManager.h">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="src\obj\animatedObj.h">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="src\obj\ghost.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="src\obj\pacman.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
   </ItemGroup>
@@ -29,7 +38,7 @@
     <ClInclude Include="src\global.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="src\gameMap.h">
+    <ClInclude Include="src\mapManager.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="src\obj\wall.h">
@@ -44,7 +53,19 @@
     <ClInclude Include="src\utils.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="src\game.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="src\obj\ghost.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ghostManager.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
     <ClInclude Include="src\obj\power.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameStatus.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>
