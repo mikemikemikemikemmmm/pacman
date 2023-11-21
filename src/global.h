@@ -6,7 +6,8 @@
 #include <iostream>
 #include <future>
 #include <chrono>
-#define LOG(e,a) std::cout <<e<<" , " << a <<std::endl;
+#define LOG(e) std::cout <<e<<std::endl;
+#define LOG2(e,a) std::cout <<e<<" , " << a <<std::endl;
 
 //direction
 struct Direction {
@@ -24,9 +25,6 @@ struct Direction {
     friend std::ostream& operator<<(std::ostream& os, const Direction& dir){
         os << "X:" << dir.x << " , Y:" << dir.y;
         return os;
-    }
-    const Direction mutiply (const int& val) const{
-        return Direction{ this->x * val,this->y * val };
     }
 };
 constexpr Direction directionUp{ 0,-1 };
@@ -75,17 +73,15 @@ constexpr int CELL_SIZE{ 30 };
 constexpr int SPRITE_SIZE{ 20 };
 constexpr int SPRITE_START_X{ ((CELL_SIZE - SPRITE_SIZE) / 2) };
 constexpr int SPRITE_START_Y { ((CELL_SIZE - SPRITE_SIZE) / 2)};
-constexpr unsigned char MAP_HEIGHT{ 32 };
-constexpr unsigned char MAP_WIDTH {27};
+constexpr unsigned int MAP_HEIGHT{ 30 };
+constexpr unsigned int MAP_WIDTH {27};
 constexpr unsigned int SCREEN_HEIGHT { MAP_HEIGHT* CELL_SIZE };
 constexpr unsigned int SCREEN_WIDTH { MAP_WIDTH * CELL_SIZE };
-constexpr unsigned char TARGET_FPS{ 60 };
+constexpr unsigned int TARGET_FPS{ 60 };
 constexpr unsigned int FRAME_COST_MILLSECOND{ 30 };
 constexpr int OBJ_MEET_MAX_DISTANCE{ 6 };
 
-
-
-//speed , must can be indivde by CELL_SIZE
+//speed , must be indivde by CELL_SIZE
 constexpr int PACMAN_SPEED{ 6 };
 constexpr int GHOST_NORMAL_SPEED {6};
 constexpr int GHOST_PANIC_SPEED{ 6 };
@@ -127,7 +123,7 @@ enum class MapCellType :char {
     Empty = 'e',
     Door = 'd'
 };
-constexpr MapType defaultGameMap {{/////////////////////////
+constexpr MapType defaultGameMap {{
     {'w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'},
     {'w','s','s','s','s','s','s','s','s','s','s','s','s','w','s','s','s','s','s','s','s','s','s','s','s','s','w'},
     {'w','s','w','w','w','w','s','w','w','w','w','w','s','w','s','w','w','w','w','w','s','w','w','w','w','s','w'},
@@ -141,9 +137,7 @@ constexpr MapType defaultGameMap {{/////////////////////////
     {'w','w','w','w','w','w','s','w','w','w','w','w','e','w','e','w','w','w','w','w','s','w','w','w','w','w','w'},
     {'w','w','w','w','w','w','s','w','w','e','e','e','e','e','e','e','e','e','w','w','s','w','w','w','w','w','w'},
     {'w','w','w','w','w','w','s','w','w','e','w','w','w','d','w','w','w','e','w','w','s','w','w','w','w','w','w'},
-    {'w','w','w','w','w','w','s','w','w','e','w','w','e','e','e','w','w','e','w','w','s','w','w','w','w','w','w'},
     {'w','w','w','w','w','w','s','e','e','e','w','w','e','e','e','w','w','e','e','e','s','w','w','w','w','w','w'},
-    {'w','w','w','w','w','w','s','w','w','e','w','w','w','w','w','w','w','e','w','w','s','w','w','w','w','w','w'},
     {'w','w','w','w','w','w','s','w','w','e','w','w','w','w','w','w','w','e','w','w','s','w','w','w','w','w','w'},
     {'w','w','w','w','w','w','s','w','w','e','e','e','e','e','e','e','e','e','w','w','s','w','w','w','w','w','w'},
     {'w','w','w','w','w','w','s','w','w','e','w','w','w','w','w','w','w','e','w','w','s','w','w','w','w','w','w'},
@@ -177,13 +171,17 @@ struct SpriteXY {
 };
 
 //pacman
-constexpr Position PACMAN_START_POS  { 13 * CELL_SIZE,23 * CELL_SIZE };
+constexpr Position PACMAN_START_POS  { 13 * CELL_SIZE,21 * CELL_SIZE };
 
 //ghost 
-constexpr Position BLINKY_START_POS{12 * CELL_SIZE , 14 * CELL_SIZE };
-constexpr Position PINKY_START_POS{12 * CELL_SIZE , 14 * CELL_SIZE };
+constexpr Position BLINKY_START_POS{12 * CELL_SIZE , 13 * CELL_SIZE };
+constexpr Position PINKY_START_POS{12 * CELL_SIZE , 12 * CELL_SIZE };
 constexpr Position INKY_START_POS{13 * CELL_SIZE ,  14* CELL_SIZE };
 constexpr Position CLYDE_START_POS{14 * CELL_SIZE , 14* CELL_SIZE };
+constexpr int GHOST_RECHASE_SECOND = 2;
+
 //door
-constexpr MapIndex DoorIndex{ 13 ,15  };
+constexpr MapIndex DoorIndex{ 13 ,12  };
 const Position DoorPos = DoorIndex.getPosition();
+constexpr MapIndex DoorExitIndex{ 13 ,11 };
+const Position DoorExitPos = DoorExitIndex.getPosition();

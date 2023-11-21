@@ -21,21 +21,14 @@ public:
 	std::vector<GhostObj*> m_ghostPtrList;
 	Position* m_pacmanPosPtr = &(m_pacmanPtr->m_pos);
 	GhostObj m_Blinky;
-	void handlePacmanMeetGhost(GhostObj& g) {
+	void handlePacmanMeetGhost(GhostObj& g) const  {
 		if (g.m_status == GhostObj::GhostStatus::Panic||
 			g.m_status == GhostObj::GhostStatus::PanicEnd) {
 			g.setStatus(GhostObj::GhostStatus::Die);
+			g.setTargetPos(g.m_startPos);
+			g.setCanMoveDoor(true);
+
 		}
-	}
-	void handleAsyncSetStatusWhenPacmanEatPower(const std::shared_ptr<std::vector<GhostObj*>>& gPtrList ) {
-			std::this_thread::sleep_for(std::chrono::seconds(3));
-			for (auto& gPtr : *gPtrList) {
-				gPtr->setStatus(GhostObj::GhostStatus::PanicEnd);
-			};
-			std::this_thread::sleep_for(std::chrono::seconds(2));
-			for (auto& gPtr : *gPtrList) {
-				gPtr->setStatus(GhostObj::GhostStatus::Chase);
-			};
 	}
 	void handlePacmanEatPower() {
 		auto targetGhostPtrList = std::make_shared<std::vector<GhostObj*>>();
@@ -45,7 +38,16 @@ public:
 				g->setStatus(GhostObj::GhostStatus::Panic);
 			};
 		};
-		std::thread t(&GhostManager::handleAsyncSetStatusWhenPacmanEatPower,this, targetGhostPtrList);
+		std::thread t([targetGhostPtrList, this]() {
+			std::this_thread::sleep_for(std::chrono::seconds(3));
+			for (auto& gPtr : *targetGhostPtrList) {
+				gPtr->setStatus(GhostObj::GhostStatus::PanicEnd);
+			};
+			std::this_thread::sleep_for(std::chrono::seconds(2));
+			for (auto& gPtr : *targetGhostPtrList) {
+				gPtr->setStatus(GhostObj::GhostStatus::Chase);
+			};
+		});
 		t.detach();
 	}
 	void drawAllGhost(){
@@ -104,16 +106,39 @@ public:
 			setGhostTargetWhenChase(ghost);
 			break;
 		}
+		case GhostObj::GhostStatus::StayAtStartPos: {
+			ghost.setSpeed(0);
+			ghost.setStatus(GhostObj::GhostStatus::GoOutDoor);
+			std::thread t([&ghost,this]() {
+				std::this_thread::sleep_for(std::chrono::seconds(4));
+				ghost.setSpeed(5);
+			});
+			t.detach();
+			break;
+		}
+		case GhostObj::GhostStatus::GoOutDoor: {
+			ghost.setCanMoveDoor(true);
+			if (ghost.m_pos == DoorExitPos) {
+				ghost.setStatus(GhostObj::GhostStatus::Chase);
+				ghost.setCanMoveDoor(false);
+				return;
+			};
+			ghost.setTargetPos(DoorExitPos);
+			break;
+		}
 		case GhostObj::GhostStatus::Die: {
-			Position startPos = GhostObj::m_ghostStartPos.at(ghost.m_color);
-			if (startPos ==ghost.m_pos) {
-				ghost.setStatus(GhostObj::GhostStatus::WaitingForChase);
+			ghost.setCanMoveDoor(true);
+			Position startPos = ghost.m_startPos;
+			if (startPos ==ghost.m_pos) {  // after be eaten and back to start pos.
+				ghost.setStatus(GhostObj::GhostStatus::StayAtStartPos);
 				return;
 			}
 			ghost.setTargetPos(startPos);
 			break;
 		}
 		default: { //panic or panicEnd TODO
+
+
 			break;
 			}
 		}

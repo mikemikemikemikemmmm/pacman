@@ -40,7 +40,7 @@ public:
 		m_ghostManager.drawAllGhost();
 		m_pacmanPtr->drawSelf();
 	}
-	bool checkTouchByTwoObj(const BaseObj& o1,const BaseObj& o2) {
+	static bool checkTouchByTwoObj(const BaseObj& o1,const BaseObj& o2) {
 		if (o1.m_pos.x == o2.m_pos.x) {
 			return std::abs(o1.m_pos.y - o2.m_pos.y) <= OBJ_MEET_MAX_DISTANCE;
 		}
@@ -48,7 +48,10 @@ public:
 			return std::abs(o1.m_pos.x - o2.m_pos.x) <= OBJ_MEET_MAX_DISTANCE;
 		}
 		else if (
-			(std::abs(o1.m_pos.x - o2.m_pos.x) + std::abs(o1.m_pos.y - o2.m_pos.y)) <= OBJ_MEET_MAX_DISTANCE
+			(
+				std::abs(o1.m_pos.x - o2.m_pos.x) + 
+				std::abs(o1.m_pos.y - o2.m_pos.y)
+			) <=OBJ_MEET_MAX_DISTANCE
 			) {
 			return true;
 		}
@@ -58,7 +61,7 @@ public:
 	}
 	void checkPacmanEatPower() {
 			for(auto& p : *m_powerList) {
-				if (checkTouchByTwoObj(p, *m_pacmanPtr)) {
+				if (this->checkTouchByTwoObj(p, *m_pacmanPtr)) {
 					m_powerList->erase(std::remove(m_powerList->begin(), m_powerList->end(), p), m_powerList->end());
 					m_ghostManager.handlePacmanEatPower();
 				}
@@ -70,7 +73,7 @@ public:
 	void checkPacmanMeetGhost() {
 			auto& ghostList = m_ghostManager.m_ghostPtrList;
 			for (auto& g : ghostList) {
-				if (checkTouchByTwoObj(*g, *m_pacmanPtr)) {
+				if (this->checkTouchByTwoObj(*g, *m_pacmanPtr)) {
 					if (g->m_status == GhostObj::GhostStatus::Chase) {
 						handleGameOver();
 					}

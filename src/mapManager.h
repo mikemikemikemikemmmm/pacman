@@ -31,20 +31,19 @@ public:
 		const char targetType = getMapCol(XY);
 		return targetType == tranMapTypeToChar(cellType);
 	};
-	const bool canMoveAtPosition(const Position& pos,const bool& canMoveDoor =false) const {
+	const bool canMoveAtPosition(const Position& pos,const bool& canMoveDoor) const {
 		const int x = pos.x;
 		const int y = pos.y;
+		//minus 1 due to origin position have one pixel.
 		const MapIndex leftUpCorner = tranXYToMapIndex(x, y);
 		const MapIndex leftDownCorner = tranXYToMapIndex(x, y + CELL_SIZE - 1);
 		const MapIndex rightUpCorner = tranXYToMapIndex(x + CELL_SIZE - 1, y);
 		const MapIndex rightDownCorner = tranXYToMapIndex(x + CELL_SIZE - 1, y + CELL_SIZE - 1);
-		//minus 1 due to origin position have one pixel.
 		if (canMoveDoor) {
 			return notWallByMapIndex(leftUpCorner) &&
 				notWallByMapIndex(leftDownCorner) &&
 				notWallByMapIndex(rightUpCorner) &&
 				notWallByMapIndex(rightDownCorner);
-
 		}
 		return notWallAndDoorByMapIndex(leftUpCorner) &&
 			notWallAndDoorByMapIndex(leftDownCorner) &&

@@ -13,28 +13,28 @@
 #include "obj/wall.h"
 #include "obj/pacman.h"
 class Game {
-public:
-    std::chrono::time_point<std::chrono::steady_clock> m_previousTime;
+private:
     std::shared_ptr<MapManager> m_mapManager;
     std::shared_ptr<ObjManager> m_objManager;
     std::shared_ptr<Texture2D> m_sprite;
     std::shared_ptr<GameStatusManager> m_gameStatusManager;
+    std::chrono::time_point<std::chrono::steady_clock> m_previousTime;
 	long long m_lag = 0;
 	void initGameWindow() {
 		InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "pacman");
 		SetTargetFPS(TARGET_FPS);
         m_sprite = std::make_shared<Texture2D>(LoadTexture("resources/pacman3.png"));
+        m_mapManager = std::make_shared<MapManager>(defaultGameMap);
 	};
     void initState() {
         m_previousTime =std::chrono::steady_clock::now();
-        m_mapManager = std::make_shared<MapManager>(defaultGameMap);
         m_gameStatusManager= std::make_shared<GameStatusManager>();
     }
     void initObj() {
         const char wallChar = m_mapManager->tranMapTypeToChar(MapCellType::Wall);
         const char powerChar = m_mapManager->tranMapTypeToChar(MapCellType::Power);
-        auto wallList = std::make_shared<std::vector<WallObj>>();
-        auto powerList = std::make_shared<std::vector<PowerObj>>();
+        const auto wallList = std::make_shared<std::vector<WallObj>>();
+        const auto powerList = std::make_shared<std::vector<PowerObj>>();
         for (int row = 0; row < m_mapManager->m_map.size(); row++) {
             for (int col = 0; col < m_mapManager->m_map[0].size(); col++) {
                 if (m_mapManager->m_map[row][col] == wallChar) {
@@ -77,7 +77,7 @@ public:
 
     }
 	void handleGameLoop() {
-        {
+        while(!WindowShouldClose()){
             const std::chrono::time_point<std::chrono::steady_clock> currentTime =
                 std::chrono::steady_clock::now();
             const auto delta_time =
@@ -86,10 +86,10 @@ public:
             m_previousTime += std::chrono::milliseconds(delta_time);
 
             while (m_lag >= FRAME_COST_MILLSECOND) {
-                m_lag =0;
-                if (m_gameStatusManager->gameStatus == GameStatusManager::GameStatus::Playing) {
+                m_lag = 0;
+                //if (m_gameStatusManager->gameStatus == GameStatusManager::GameStatus::Playing) {
                     handleInput();
-                }
+                //}
                 BeginDrawing();
                 ClearBackground(BLACK);
                 m_objManager->drawAllObj();
@@ -101,6 +101,7 @@ public:
         UnloadTexture(*m_sprite);
         CloseWindow();
     }
+public:
 	Game() {
 		initGameWindow();
         initState();
