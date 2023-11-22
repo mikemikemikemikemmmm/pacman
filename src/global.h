@@ -80,6 +80,7 @@ constexpr unsigned int SCREEN_WIDTH { MAP_WIDTH * CELL_SIZE };
 constexpr unsigned int TARGET_FPS{ 60 };
 constexpr unsigned int FRAME_COST_MILLSECOND{ 30 };
 constexpr int OBJ_MEET_MAX_DISTANCE{ 6 };
+constexpr Position MAP_CENTER_POS { MAP_WIDTH / 2 * CELL_SIZE,MAP_HEIGHT / 2 * CELL_SIZE };
 
 //speed , must be indivde by CELL_SIZE
 constexpr int PACMAN_SPEED{ 6 };

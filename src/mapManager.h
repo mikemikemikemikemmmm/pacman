@@ -4,7 +4,6 @@
 #include<cmath>
 #include "utils.h"
 #include "global.h"
-typedef std::queue<std::pair<Direction, MapIndex>> PathQueue;
 class MapManager {
 public:
 	MapType m_map;
