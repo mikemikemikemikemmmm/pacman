@@ -3,7 +3,7 @@
 #include <future>
 #include <chrono>
 #include <thread>
-		
+#include <ctime> 
 #include "../lib/raylib/include/raylib.h"
 #include "gameStatus.h"
 #include "global.h"
@@ -14,47 +14,47 @@
 #include "obj/pacman.h"
 class Game {
 private:
-    std::shared_ptr<MapManager> m_mapManager;
-    std::shared_ptr<ObjManager> m_objManager;
-    std::shared_ptr<Texture2D> m_sprite;
-    std::shared_ptr<GameStatusManager> m_gameStatusManager;
+     Texture2D m_sprite;
+    MapManager m_mapManager{defaultGameMap};
+    std::unique_ptr<ObjManager> m_objManager;
+    GameStatusManager m_gameStatusManager;
     std::chrono::time_point<std::chrono::steady_clock> m_previousTime;
 	long long m_lag = 0;
 	void initGameWindow() {
 		InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "pacman");
 		SetTargetFPS(TARGET_FPS);
-        m_sprite = std::make_shared<Texture2D>(LoadTexture("resources/pacman3.png"));
-        m_mapManager = std::make_shared<MapManager>(defaultGameMap);
+        m_sprite = LoadTexture("resources/pacman3.png");
+        std::srand(time(NULL));
 	};
-    void initState() {
+    void initStatus() {
         m_previousTime =std::chrono::steady_clock::now();
-        m_gameStatusManager= std::make_shared<GameStatusManager>();
+        m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Starting);
     }
     void initObj() {
-        const char wallChar = m_mapManager->tranMapTypeToChar(MapCellType::Wall);
-        const char powerChar = m_mapManager->tranMapTypeToChar(MapCellType::Power);
-        const auto wallList = std::make_shared<std::vector<WallObj>>();
-        const auto powerList = std::make_shared<std::vector<PowerObj>>();
-        for (int row = 0; row < m_mapManager->m_map.size(); row++) {
-            for (int col = 0; col < m_mapManager->m_map[0].size(); col++) {
-                if (m_mapManager->m_map[row][col] == wallChar) {
+        const char wallChar = m_mapManager.tranMapTypeToChar(MapCellType::Wall);
+        const char powerChar = m_mapManager.tranMapTypeToChar(MapCellType::Power);
+        auto wallList = std::vector<WallObj>();
+        auto powerList = std::vector<PowerObj>();
+        for (int row = 0; row < m_mapManager.m_map.size(); row++) {
+            for (int col = 0; col < m_mapManager.m_map[0].size(); col++) {
+                if (m_mapManager.m_map[row][col] == wallChar) {
                     const int x = col * CELL_SIZE;
                     const int y = row * CELL_SIZE;
-                    wallList->emplace_back(Position{ x,y }, m_sprite);
+                    wallList.emplace_back(Position{ x,y }, m_sprite);
                 }
-                else if (m_mapManager->m_map[row][col] == powerChar) {
+                else if (m_mapManager.m_map[row][col] == powerChar) {
                     const int x = col * CELL_SIZE;
                     const int y = row * CELL_SIZE;
-                    powerList->emplace_back(Position{ x,y }, m_sprite);
+                    powerList.emplace_back(Position{ x,y }, m_sprite);
                 }
             }
         }
-        const auto pacmanStr = std::make_shared<PacmanObj>(
+        const PacmanObj pacman {
             PACMAN_START_POS,
             m_mapManager,
             m_sprite
-        );
-        m_objManager = std::make_shared<ObjManager>(m_gameStatusManager,m_mapManager, m_sprite, pacmanStr,wallList,powerList);
+        };
+        m_objManager = std::make_unique<ObjManager>( m_gameStatusManager, m_mapManager, m_sprite, pacman, wallList, powerList );
     }
     void handleInput() {
         if (IsKeyPressed(KEY_RIGHT)) {
@@ -72,9 +72,7 @@ private:
     }
     void handleStartPlayGame() {
         std::this_thread::sleep_for(std::chrono::seconds(2));
-        m_gameStatusManager->setGameStatus(GameStatusManager::GameStatus::Playing);
-        auto ghostPtrList = m_objManager->m_ghostManager.m_ghostPtrList;
-
+        m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Playing);
     }
 	void handleGameLoop() {
         while(!WindowShouldClose()){
@@ -87,7 +85,7 @@ private:
 
             while (m_lag >= FRAME_COST_MILLSECOND) {
                 m_lag = 0;
-                //if (m_gameStatusManager->gameStatus == GameStatusManager::GameStatus::Playing) {
+                //if (m_gameStatusManager->gameStatus == GameStatusManager::GameStatus::Playing)  {
                     handleInput();
                 //}
                 BeginDrawing();
@@ -98,13 +96,14 @@ private:
         }
 	}
     void handleCloseWindow() {
-        UnloadTexture(*m_sprite);
+        UnloadTexture(m_sprite);
         CloseWindow();
     }
 public:
-	Game() {
+	Game()
+    {
 		initGameWindow();
-        initState();
+        initStatus();
         initObj();
         handleGameLoop();
         handleCloseWindow();

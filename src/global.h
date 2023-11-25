@@ -9,6 +9,22 @@
 #define LOG(e) std::cout <<e<<std::endl;
 #define LOG2(e,a) std::cout <<e<<" , " << a <<std::endl;
 
+
+
+//system
+constexpr int CELL_SIZE = 30;
+constexpr int SPRITE_SIZE = 20;
+constexpr int SPRITE_START_X = ((CELL_SIZE - SPRITE_SIZE) / 2);
+constexpr int SPRITE_START_Y = ((CELL_SIZE - SPRITE_SIZE) / 2);
+constexpr unsigned int MAP_HEIGHT = 30;
+constexpr unsigned int MAP_WIDTH = 27;
+constexpr unsigned int MAP_MAX_X = MAP_WIDTH * CELL_SIZE;
+constexpr unsigned int MAP_MAX_Y = MAP_HEIGHT * CELL_SIZE;
+constexpr unsigned int SCREEN_HEIGHT = MAP_HEIGHT * CELL_SIZE;
+constexpr unsigned int SCREEN_WIDTH = MAP_WIDTH * CELL_SIZE;
+constexpr unsigned int TARGET_FPS = 60;
+constexpr unsigned int FRAME_COST_MILLSECOND = 30;
+constexpr int OBJ_MEET_MAX_DISTANCE = 10;
 //direction
 struct Direction {
     int x;
@@ -23,8 +39,33 @@ struct Direction {
         return Direction{ this->x * val,this->y * val };
     }
     friend std::ostream& operator<<(std::ostream& os, const Direction& dir){
-        os << "X:" << dir.x << " , Y:" << dir.y;
+        os << dir.getType();
         return os;
+    }
+    bool isYAxis() const{
+        if (std::abs(this->y)>0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    std::string getType() const {
+        if (this->x==0&&this->y==0) {
+            return "stay";
+        }
+        else if (this->x == 0 && this->y > 0) {
+            return "down";
+        }
+        else if (this->x == 0 && this->y < 0) {
+            return "up";
+        }
+        else if (this->x < 0 && this->y == 0) {
+            return "left";
+        }
+        else {
+            return "right";
+        }
     }
 };
 constexpr Direction directionUp{ 0,-1 };
@@ -32,6 +73,7 @@ constexpr Direction directionDown{ 0,1 };
 constexpr Direction directionRight{ 1,0 };
 constexpr Direction directionLeft{ -1,0 };
 constexpr Direction directionStay{ 0,0 };
+const std::array<Direction, 4> fourDirectionArray {directionUp, directionDown, directionRight, directionLeft};
 
 struct Position {
     int x;
@@ -63,46 +105,41 @@ struct Position {
             this->y + dir.y
         };
     }
+    Position operator+(const Position& pos) const {
+        return Position{
+            this->x + pos.x,
+            this->y + pos.y
+        };
+    }
+    Position* operator+=(const Position& pos)  {
+        this->x += pos.x;
+        this->y += pos.y;
+        return this;
+    }
     int getDistance() const{
         return this->x * this->x + this->y * this->y;
     }
+    Direction tranToDir() const{
+        const int total = this->x + this->y;
+        return {this->x/total,this->y/total};
+    }
 };
-
-//system
-constexpr int CELL_SIZE{ 30 };
-constexpr int SPRITE_SIZE{ 20 };
-constexpr int SPRITE_START_X{ ((CELL_SIZE - SPRITE_SIZE) / 2) };
-constexpr int SPRITE_START_Y { ((CELL_SIZE - SPRITE_SIZE) / 2)};
-constexpr unsigned int MAP_HEIGHT{ 30 };
-constexpr unsigned int MAP_WIDTH {27};
-constexpr unsigned int SCREEN_HEIGHT { MAP_HEIGHT* CELL_SIZE };
-constexpr unsigned int SCREEN_WIDTH { MAP_WIDTH * CELL_SIZE };
-constexpr unsigned int TARGET_FPS{ 60 };
-constexpr unsigned int FRAME_COST_MILLSECOND{ 30 };
-constexpr int OBJ_MEET_MAX_DISTANCE{ 6 };
-constexpr Position MAP_CENTER_POS { MAP_WIDTH / 2 * CELL_SIZE,MAP_HEIGHT / 2 * CELL_SIZE };
-
-//speed , must be indivde by CELL_SIZE
-constexpr int PACMAN_SPEED{ 6 };
-constexpr int GHOST_NORMAL_SPEED {6};
-constexpr int GHOST_PANIC_SPEED{ 6 };
-constexpr int GHOST_DIE_SPEED{ 10 };
 
 //map
 class MapIndex {
 public:
     int x;
     int y;
-    bool operator==(const MapIndex& other) const{
+    bool operator==(const MapIndex& other) const {
         return this->x == other.x && this->y == other.y;
     };
     bool operator!=(const MapIndex& other) const {
         return this->x != other.x || this->y != other.y;
     };
-    const MapIndex operator-(const MapIndex& other) const{
+    const MapIndex operator-(const MapIndex& other) const {
         return MapIndex{
-            this->x-other.x,
-            this->y-other.y
+            this->x - other.x,
+            this->y - other.y
         };
     };
     friend std::ostream& operator<<(std::ostream& os, const MapIndex& mapIndex) {
@@ -124,7 +161,7 @@ enum class MapCellType :char {
     Empty = 'e',
     Door = 'd'
 };
-constexpr MapType defaultGameMap {{
+constexpr MapType defaultGameMap{ {
     {'w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'},
     {'w','s','s','s','s','s','s','s','s','s','s','s','s','w','s','s','s','s','s','s','s','s','s','s','s','s','w'},
     {'w','s','w','w','w','w','s','w','w','w','w','w','s','w','s','w','w','w','w','w','s','w','w','w','w','s','w'},
@@ -154,8 +191,12 @@ constexpr MapType defaultGameMap {{
     {'w','s','w','w','w','w','w','w','w','w','w','w','s','w','s','w','w','w','w','w','w','w','w','w','w','s','w'},
     {'w','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','w'},
     {'w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'}
-}};
+} };
+const Position MAP_CENTER_POS = MapIndex{ MAP_WIDTH / 2 ,MAP_HEIGHT / 2 }.getPosition();
 
+//speed , must be divisible by CELL_SIZE
+constexpr int PACMAN_SPEED{ 6 };
+constexpr int GHOST_SPEED{ 6 };
 
 //animation
 constexpr int ANIMATION_MAX_COUNTER = 5;
@@ -165,7 +206,7 @@ struct AnimationData {
     unsigned short totalFrame;
     bool isReapted;
 };
-typedef std::unordered_map<std::string,const AnimationData> AnimationDataMap;
+typedef std::unordered_map<std::string, AnimationData> AnimationDataMap;
 struct SpriteXY {
     float x;
     float y;
@@ -179,7 +220,9 @@ constexpr Position BLINKY_START_POS{12 * CELL_SIZE , 13 * CELL_SIZE };
 constexpr Position PINKY_START_POS{12 * CELL_SIZE , 12 * CELL_SIZE };
 constexpr Position INKY_START_POS{13 * CELL_SIZE ,  14* CELL_SIZE };
 constexpr Position CLYDE_START_POS{14 * CELL_SIZE , 14* CELL_SIZE };
-constexpr int GHOST_RECHASE_SECOND = 2;
+constexpr int GHOST_stayAtStartPos_SECOND = 1;
+constexpr int GHOST_panic_SECOND = 4;
+constexpr int GHOST_panicEnd_SECOND = 4;
 
 //door
 constexpr MapIndex DoorIndex{ 13 ,12  };

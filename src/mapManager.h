@@ -6,10 +6,7 @@
 #include "global.h"
 class MapManager {
 public:
-	MapType m_map;
-	void setMapCol(const MapIndex& mapIndex, const MapCellType& cellType) {
-		m_map[mapIndex.y][mapIndex.x]  = tranMapTypeToChar(cellType) ;
-	}
+	const MapType m_map;
 	const char tranMapTypeToChar(const MapCellType& cellType) const{
 		return  static_cast<char>(cellType);
 	};

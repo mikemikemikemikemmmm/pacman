@@ -165,6 +165,7 @@
     <ClInclude Include="src\obj\pacman.h" />
     <ClInclude Include="src\obj\power.h" />
     <ClInclude Include="src\obj\wall.h" />
+    <ClInclude Include="src\pathUtil.h" />
     <ClInclude Include="src\utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

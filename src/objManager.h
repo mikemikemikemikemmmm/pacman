@@ -15,15 +15,15 @@
 
 class ObjManager {
 public:
-	const std::shared_ptr<Texture2D> m_spritePtr;
-	const std::shared_ptr<GameStatusManager> m_gameStatusManagerPtr;
-	const std::shared_ptr <MapManager> m_mapManagerPtr;
-	const std::shared_ptr <PacmanObj> m_pacmanPtr;
-	std::shared_ptr<std::vector<PowerObj>>m_powerList;
-	std::shared_ptr<std::vector<WallObj>> m_wallList;
-	GhostManager m_ghostManager;
+	const Texture2D& m_sprite;
+	const GameStatusManager& m_gameStatusManager;
+	const MapManager& m_mapManager;
+	std::unique_ptr<GhostManager> m_ghostManager;
+	PacmanObj m_pacman;
+	std::vector<PowerObj> m_powerList;
+	std::vector<WallObj> m_wallList;
 	void handleKeyPressed(const Direction& dir){
-		m_pacmanPtr->setNextTurnDirection(dir);
+		m_pacman.setNextTurnDirection(dir);
 	}
 	void checkEvent() {
 		checkPacmanEatPower();
@@ -31,14 +31,14 @@ public:
 	};
 	void drawAllObj() {
 		checkEvent();
-		for (WallObj& w : *m_wallList) {
+		for (WallObj& w : m_wallList) {
 			w.drawSelf();
 		};
-		for (PowerObj& p : *m_powerList) {
+		for (PowerObj& p : m_powerList) {
 			p.drawSelf();
 		};
-		m_ghostManager.drawAllGhost();
-		m_pacmanPtr->drawSelf();
+		m_ghostManager->drawAllGhost();
+		m_pacman.drawSelf();
 	}
 	static bool checkTouchByTwoObj(const BaseObj& o1,const BaseObj& o2) {
 		if (o1.m_pos.x == o2.m_pos.x) {
@@ -60,25 +60,25 @@ public:
 		}
 	}
 	void checkPacmanEatPower() {
-			for(auto& p : *m_powerList) {
-				if (this->checkTouchByTwoObj(p, *m_pacmanPtr)) {
-					m_powerList->erase(std::remove(m_powerList->begin(), m_powerList->end(), p), m_powerList->end());
-					m_ghostManager.handlePacmanEatPower();
+			for(auto& p : m_powerList) {
+				if (this->checkTouchByTwoObj(p, m_pacman)) {
+					m_powerList.erase(std::remove(m_powerList.begin(), m_powerList.end(), p), m_powerList.end());
+					m_ghostManager->handlePacmanEatPower();
 				}
 			}
-			if (m_powerList->empty()) {
+			if (m_powerList.empty()) {
 				handleGameWin();
 			}
 		};
 	void checkPacmanMeetGhost() {
-			auto& ghostList = m_ghostManager.m_ghostPtrList;
+			auto& ghostList = m_ghostManager->m_ghostList;
 			for (auto& g : ghostList) {
-				if (this->checkTouchByTwoObj(*g, *m_pacmanPtr)) {
-					if (g->m_status == GhostObj::GhostStatus::Chase) {
+				if (this->checkTouchByTwoObj(*g, m_pacman)) {
+					if (g->m_moveStatus == GhostObj::MoveStatus::chase) {
 						handleGameOver();
 					}
 					else {
-						m_ghostManager.handlePacmanMeetGhost(*g);
+						m_ghostManager->handlePacmanMeetGhost(*g);
 					};
 				};
 			};
@@ -90,22 +90,20 @@ public:
 
 	}
 	ObjManager(
-		const std::shared_ptr<GameStatusManager> gameStatusManagerPtr,
-		const std::shared_ptr<MapManager> mapManagerPtr,
-		const std::shared_ptr<Texture2D> spritePtr,
-		const std::shared_ptr<PacmanObj> pacmanPtr,
-		const std::shared_ptr<std::vector<WallObj>> wallList,
-		const std::shared_ptr<std::vector<PowerObj>> powerList
+		const GameStatusManager& gameStatusManager,
+		const MapManager& mapManager,
+		const Texture2D& sprite,
+		const PacmanObj& pacman,
+		const std::vector<WallObj>& wallList,
+		const std::vector<PowerObj>& powerList
 	) :
-		m_gameStatusManagerPtr(gameStatusManagerPtr),
-		m_mapManagerPtr(mapManagerPtr),
-		m_spritePtr(spritePtr),
-		m_pacmanPtr(pacmanPtr),
+		m_gameStatusManager(gameStatusManager),
+		m_mapManager(mapManager),
+		m_sprite(sprite),
+		m_pacman(pacman),
 		m_wallList(wallList),
-		m_powerList(powerList),
-		m_ghostManager(pacmanPtr, mapManagerPtr, spritePtr, powerList)
+		m_powerList(powerList)
 	{
-	}
-	~ObjManager() {
+		m_ghostManager = std::make_unique<GhostManager>(m_pacman, m_mapManager, m_sprite, m_powerList);
 	}
 };

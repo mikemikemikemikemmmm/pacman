@@ -13,148 +13,151 @@
 #include "obj/ghost.h"
 class GhostManager {
 public:
+	const PacmanObj& m_pacman;
+	const MapManager& m_mapManager;
+	const Texture2D& m_sprite;
+	std::vector<PowerObj>& m_powerList;
+	std::vector<GhostObj*> m_ghostList;
 	const static int m_maxIntValue = std::numeric_limits<int>::max();
-	const std::shared_ptr <PacmanObj> m_pacmanPtr;
-	const std::shared_ptr <MapManager> m_mapManager;
-	const std::shared_ptr <Texture2D> m_spritePtr;
-	const std::shared_ptr <std::vector<PowerObj>> m_powerList;
-	std::vector<GhostObj*> m_ghostPtrList;
-	Position* m_pacmanPosPtr = &(m_pacmanPtr->m_pos);
-	GhostObj m_Blinky;
+	GhostObj m_blinky;
 	void handlePacmanMeetGhost(GhostObj& g) const  {
-		if (g.m_status == GhostObj::GhostStatus::Panic||
-			g.m_status == GhostObj::GhostStatus::PanicEnd) {
-			g.setStatus(GhostObj::GhostStatus::Die);
-			g.setTargetPos(g.m_startPos);
-			g.setCanMoveDoor(true);
+		if (g.m_animationStatus == GhostObj::AnimationStatus::panic||
+			g.m_animationStatus == GhostObj::AnimationStatus::panicEnd) {
 
+			g.setAnimationStatus(GhostObj::AnimationStatus::die);
+			g.setMoveStatus(GhostObj::MoveStatus::die);
 		}
 	}
 	void handlePacmanEatPower() {
-		auto targetGhostPtrList = std::make_shared<std::vector<GhostObj*>>();
-		for (auto& g : m_ghostPtrList) {
-			if (g->m_status != GhostObj::GhostStatus::Die) {
-				targetGhostPtrList->push_back(g);
-				g->setStatus(GhostObj::GhostStatus::Panic);
+		auto targetGhostPtrList = std::vector<GhostObj*>();
+		for (auto& g : m_ghostList) {
+			if (g->m_animationStatus != GhostObj::AnimationStatus::die) {
+				targetGhostPtrList.push_back(g);
+				g->setAnimationStatus(GhostObj::AnimationStatus::panic);
+				g->setMoveStatus(GhostObj::MoveStatus::panic);
 			};
 		};
-		std::thread t([targetGhostPtrList, this]() {
-			std::this_thread::sleep_for(std::chrono::seconds(3));
-			for (auto& gPtr : *targetGhostPtrList) {
-				gPtr->setStatus(GhostObj::GhostStatus::PanicEnd);
-			};
-			std::this_thread::sleep_for(std::chrono::seconds(2));
-			for (auto& gPtr : *targetGhostPtrList) {
-				gPtr->setStatus(GhostObj::GhostStatus::Chase);
+		std::thread t([ptrList = std::move(targetGhostPtrList)]() {
+			std::this_thread::sleep_for(std::chrono::seconds(GHOST_panic_SECOND));
+			for (auto& g : ptrList) {
+				if (g->m_animationStatus != GhostObj::AnimationStatus::panic) {
+					return;
+				}
+				g->setAnimationStatus(GhostObj::AnimationStatus::panicEnd);
+				std::this_thread::sleep_for(std::chrono::seconds(GHOST_panicEnd_SECOND));
+				if (g->m_animationStatus != GhostObj::AnimationStatus::panicEnd) {
+					return;
+				}
+				g->setAnimationStatus(GhostObj::AnimationStatus::normal);
+				g->setMoveStatus(GhostObj::MoveStatus::chase);
 			};
 		});
 		t.detach();
 	}
 	void drawAllGhost(){
-		for (auto& gPtr: m_ghostPtrList) {
-			setGhostTarget(*gPtr);
-			gPtr->drawSelf();
+		for (auto& g: m_ghostList) {
+			handleGhostMoveStatus(*g);
+			g->drawSelf();
 		}
 	};
 	void setGhostTargetWhenChase(GhostObj& ghost) {	
+		const Position& pacmanPos = m_pacman.getPacmanPos();
 		switch (ghost.m_color) {
-			case GhostObj::GhostColor::Blinky: {
-				ghost.setTargetPos(*m_pacmanPosPtr);
+			case GhostObj::GhostColor::blinky: {
+				ghost.setTargetPos(pacmanPos);
 				break;
 			}
-			case GhostObj::GhostColor::Pinky: {
-				Position targetPos = { *m_pacmanPosPtr * 2 - m_Blinky.m_pos };
+			case GhostObj::GhostColor::pinky: {
+				Position targetPos = { pacmanPos * 2 - m_blinky.m_pos };
 				ghost.setTargetPos(targetPos);
 				break;
 			}
-			case GhostObj::GhostColor::Inky: {
-				auto powerSize = m_powerList->size();
+			case GhostObj::GhostColor::inky: {
+				auto powerSize = m_powerList.size();
 				if (powerSize <= 1) {
-					ghost.setTargetPos(*m_pacmanPosPtr);
+					ghost.setTargetPos(pacmanPos);
 					return;
 				}
 				int minIndex = 0;
-				int min2Index = 0;
 				int minDistance = m_maxIntValue;
-				int min2Distance = m_maxIntValue - 1;
-				for (int i = 0; i < m_powerList->size(); i++) {
-					int diff = (*m_pacmanPosPtr - ((*m_powerList)[i].m_pos)).getDistance();
-					if (diff > minDistance && diff <= min2Distance) {
-						min2Index = i;
-						min2Distance = diff;
-					}
-					else if (diff < minDistance) {
+				for (int i = 0; i < powerSize; i++) {
+					int diff = (pacmanPos - (m_powerList[i].m_pos)).getDistance();
+					if (diff < minDistance) {
 						minIndex = i;
 						minDistance = diff;
 					}
 				}
-				Position closestPowerToPacman = (*m_powerList)[min2Index].m_pos;
+				Position closestPowerToPacman = m_powerList[minIndex].m_pos;
 				ghost.setTargetPos(closestPowerToPacman);
 				break;
 			}
-			case GhostObj::GhostColor::Clyde: {
-				Direction pacmanOppositeDir = m_pacmanPtr->m_currentDirection*-4;
-				ghost.setTargetPos(m_pacmanPtr->m_pos + pacmanOppositeDir);
+			case GhostObj::GhostColor::clyde: {
+				Direction pacmanOppositeDir = m_pacman.m_currentDirection*-4;
+				ghost.setTargetPos(m_pacman.m_pos + pacmanOppositeDir);
 				break;
 			}
 		}
 	}
-	void setGhostTarget(GhostObj& ghost) {
-		switch (ghost.m_status)
+	void handleGhostMoveStatus(GhostObj& ghost) {
+		const GhostObj::MoveStatus& currentMove = ghost.m_moveStatus;
+		switch (currentMove)
 		{
-		case GhostObj::GhostStatus::Chase: {
+		case GhostObj::MoveStatus::chase: {
 			setGhostTargetWhenChase(ghost);
 			break;
 		}
-		case GhostObj::GhostStatus::StayAtStartPos: {
+		case GhostObj::MoveStatus::stayAtStartPos: {
 			ghost.setSpeed(0);
-			ghost.setStatus(GhostObj::GhostStatus::GoOutDoor);
-			std::thread t([&ghost,this]() {
-				std::this_thread::sleep_for(std::chrono::seconds(4));
-				ghost.setSpeed(5);
-			});
+			ghost.setMoveStatus(GhostObj::MoveStatus::goOutDoor);
+			std::thread t([&ghost]() {
+				std::this_thread::sleep_for(std::chrono::seconds(GHOST_stayAtStartPos_SECOND));
+				ghost.setSpeed(GHOST_SPEED);
+				});
 			t.detach();
 			break;
 		}
-		case GhostObj::GhostStatus::GoOutDoor: {
+		case GhostObj::MoveStatus::goOutDoor: {
 			ghost.setCanMoveDoor(true);
 			if (ghost.m_pos == DoorExitPos) {
-				ghost.setStatus(GhostObj::GhostStatus::Chase);
+				ghost.setMoveStatus(GhostObj::MoveStatus::chase);
 				ghost.setCanMoveDoor(false);
 				return;
 			};
 			ghost.setTargetPos(DoorExitPos);
 			break;
 		}
-		case GhostObj::GhostStatus::Die: {
+		case GhostObj::MoveStatus::die: {
 			ghost.setCanMoveDoor(true);
-			Position startPos = ghost.m_startPos;
-			if (startPos ==ghost.m_pos) {  // after be eaten and back to start pos.
-				ghost.setStatus(GhostObj::GhostStatus::StayAtStartPos);
+			const Position& startPos = ghost.m_startPos;
+			if (startPos == ghost.m_pos) {  // after be eaten and back to start pos.
+				ghost.setMoveStatus(GhostObj::MoveStatus::stayAtStartPos);
+				ghost.setAnimationStatus(GhostObj::AnimationStatus::normal);
 				return;
 			}
 			ghost.setTargetPos(startPos);
 			break;
 		}
-		default: { //panic or panicEnd TODO
-
-
+		case GhostObj::MoveStatus::panic: {
+			const Position& pacmanPos = m_pacman.getPacmanPos();
+			const Position pacmanToCenterVector = { MAP_CENTER_POS - pacmanPos };
+			const Position mapEdgePos = MAP_CENTER_POS + (pacmanToCenterVector*2);
+			ghost.setTargetPos(mapEdgePos);
 			break;
-			}
+		}
 		}
 	}
 	GhostManager(
-		const std::shared_ptr<PacmanObj> pacmanPtr,
-		const std::shared_ptr<MapManager> mapManagerPtr,
-		const std::shared_ptr<Texture2D> spritePtr,
-		const std::shared_ptr<std::vector<PowerObj>> powerList) :
-		m_pacmanPtr(pacmanPtr),
-		m_mapManager(mapManagerPtr),
-		m_spritePtr(spritePtr),
+		const PacmanObj& pacman,
+		const MapManager& mapManager,
+		const Texture2D& sprite,
+		std::vector<PowerObj>& powerList) :
+		m_pacman(pacman),
+		m_mapManager(mapManager),
+		m_sprite(sprite),
 		m_powerList(powerList),
-		m_Blinky(GhostObj::GhostColor::Blinky, mapManagerPtr, spritePtr)
+		m_blinky(GhostObj::GhostColor::blinky, mapManager, sprite)
 	{
-		m_ghostPtrList.reserve(4);
-		m_ghostPtrList.push_back(&m_Blinky); 
+		m_ghostList.reserve(4);
+		m_ghostList.push_back(&m_blinky); 
 	}
 };
