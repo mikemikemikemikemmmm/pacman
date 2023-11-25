@@ -5,14 +5,7 @@
 #include "utils.h"
 #include "global.h"
 class MapManager {
-public:
-	const MapType m_map;
-	const char tranMapTypeToChar(const MapCellType& cellType) const{
-		return  static_cast<char>(cellType);
-	};
-	const char getMapCol(const MapIndex& mapIndex) const {
-		return m_map[mapIndex.y][mapIndex.x];
-	};
+private:
 	const bool notWallAndDoorByMapIndex(const MapIndex& mapIndex) const {
 		const char targetChar = getMapCol(mapIndex);
 		return targetChar != tranMapTypeToChar(MapCellType::Wall) &&
@@ -26,6 +19,14 @@ public:
 		const MapIndex XY = tranPosToMapIndex(pos);
 		const char targetType = getMapCol(XY);
 		return targetType == tranMapTypeToChar(cellType);
+	};
+	const char getMapCol(const MapIndex& mapIndex) const {
+		return m_map[mapIndex.y][mapIndex.x];
+	};
+public:
+	const MapType m_map;
+	const char tranMapTypeToChar(const MapCellType& cellType) const{
+		return static_cast<char>(cellType);
 	};
 	const bool canMoveAtPosition(const Position& pos,const bool& canMoveDoor) const {
 		const int x = pos.x;

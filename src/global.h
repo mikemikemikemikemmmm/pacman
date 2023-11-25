@@ -20,11 +20,19 @@ constexpr unsigned int MAP_HEIGHT = 30;
 constexpr unsigned int MAP_WIDTH = 27;
 constexpr unsigned int MAP_MAX_X = MAP_WIDTH * CELL_SIZE;
 constexpr unsigned int MAP_MAX_Y = MAP_HEIGHT * CELL_SIZE;
-constexpr unsigned int SCREEN_HEIGHT = MAP_HEIGHT * CELL_SIZE;
+constexpr unsigned int SCREEN_HEIGHT = (MAP_HEIGHT-1) * CELL_SIZE;
 constexpr unsigned int SCREEN_WIDTH = MAP_WIDTH * CELL_SIZE;
 constexpr unsigned int TARGET_FPS = 60;
 constexpr unsigned int FRAME_COST_MILLSECOND = 30;
-constexpr int OBJ_MEET_MAX_DISTANCE = 10;
+constexpr int OBJ_MEET_MAX_DISTANCE = 11;
+
+//font
+constexpr int TEXT_SIZE = 70;
+
+//speed , must be divisible by CELL_SIZE
+constexpr int PACMAN_SPEED = 5;
+constexpr int GHOST_SPEED = 6;
+
 //direction
 struct Direction {
     int x;
@@ -42,12 +50,12 @@ struct Direction {
         os << dir.getType();
         return os;
     }
-    bool isYAxis() const{
-        if (std::abs(this->y)>0) {
-            return true;
+    std::string getAxis()const {
+        if (std::abs(this->x)>0) {
+            return "x";
         }
         else {
-            return false;
+            return "y";
         }
     }
     std::string getType() const {
@@ -123,8 +131,14 @@ struct Position {
         const int total = this->x + this->y;
         return {this->x/total,this->y/total};
     }
+    Position flipByYAxis(const Position& axisPos)const{
+        return Position{ 2* axisPos.x - this->x,this->y };
+    }
+    Position flipByXAxis(const Position& axisPos)const {
+        return Position{ this->x,2 * axisPos.y - this->y};
+    }
 };
-
+constexpr Position SPRITE_START_POS = { SPRITE_START_X ,SPRITE_START_Y };
 //map
 class MapIndex {
 public:
@@ -194,10 +208,6 @@ constexpr MapType defaultGameMap{ {
 } };
 const Position MAP_CENTER_POS = MapIndex{ MAP_WIDTH / 2 ,MAP_HEIGHT / 2 }.getPosition();
 
-//speed , must be divisible by CELL_SIZE
-constexpr int PACMAN_SPEED{ 6 };
-constexpr int GHOST_SPEED{ 6 };
-
 //animation
 constexpr int ANIMATION_MAX_COUNTER = 5;
 struct AnimationData {
@@ -217,10 +227,10 @@ constexpr Position PACMAN_START_POS  { 13 * CELL_SIZE,21 * CELL_SIZE };
 
 //ghost 
 constexpr Position BLINKY_START_POS{12 * CELL_SIZE , 13 * CELL_SIZE };
-constexpr Position PINKY_START_POS{12 * CELL_SIZE , 12 * CELL_SIZE };
-constexpr Position INKY_START_POS{13 * CELL_SIZE ,  14* CELL_SIZE };
-constexpr Position CLYDE_START_POS{14 * CELL_SIZE , 14* CELL_SIZE };
-constexpr int GHOST_stayAtStartPos_SECOND = 1;
+constexpr Position PINKY_START_POS{13 * CELL_SIZE , 13 * CELL_SIZE };
+constexpr Position INKY_START_POS{13 * CELL_SIZE ,  13* CELL_SIZE };
+constexpr Position CLYDE_START_POS{14 * CELL_SIZE , 13* CELL_SIZE };
+constexpr int GHOST_stayAtStartPos_SECOND = 2;
 constexpr int GHOST_panic_SECOND = 4;
 constexpr int GHOST_panicEnd_SECOND = 4;
 

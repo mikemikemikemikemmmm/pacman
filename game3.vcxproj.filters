@@ -71,5 +71,8 @@
     <ClInclude Include="src\pathUtil.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="src\audioManager.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

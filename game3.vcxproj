@@ -155,6 +155,7 @@
     <ClCompile Include="src\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\audioManager.h" />
     <ClInclude Include="src\game.h" />
     <ClInclude Include="src\gameStatus.h" />
     <ClInclude Include="src\ghostManager.h" />

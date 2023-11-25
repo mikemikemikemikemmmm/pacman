@@ -20,15 +20,17 @@ public:
 	std::vector<GhostObj*> m_ghostList;
 	const static int m_maxIntValue = std::numeric_limits<int>::max();
 	GhostObj m_blinky;
+	GhostObj m_pinky;
+	GhostObj m_inky;
+	GhostObj m_clyde;
 	void handlePacmanMeetGhost(GhostObj& g) const  {
 		if (g.m_animationStatus == GhostObj::AnimationStatus::panic||
 			g.m_animationStatus == GhostObj::AnimationStatus::panicEnd) {
-
 			g.setAnimationStatus(GhostObj::AnimationStatus::die);
 			g.setMoveStatus(GhostObj::MoveStatus::die);
 		}
 	}
-	void handlePacmanEatPower() {
+	void handlePacmanEatPower() { 
 		auto targetGhostPtrList = std::vector<GhostObj*>();
 		for (auto& g : m_ghostList) {
 			if (g->m_animationStatus != GhostObj::AnimationStatus::die) {
@@ -39,14 +41,21 @@ public:
 		};
 		std::thread t([ptrList = std::move(targetGhostPtrList)]() {
 			std::this_thread::sleep_for(std::chrono::seconds(GHOST_panic_SECOND));
+			auto ghostWaitToPanicEndList = std::vector<GhostObj*>();
 			for (auto& g : ptrList) {
 				if (g->m_animationStatus != GhostObj::AnimationStatus::panic) {
-					return;
+					continue;
 				}
+				ghostWaitToPanicEndList.push_back(g);
 				g->setAnimationStatus(GhostObj::AnimationStatus::panicEnd);
-				std::this_thread::sleep_for(std::chrono::seconds(GHOST_panicEnd_SECOND));
+			};
+			if (ghostWaitToPanicEndList.empty()) {
+				return;
+			}
+			std::this_thread::sleep_for(std::chrono::seconds(GHOST_panicEnd_SECOND));
+			for (auto& g : ghostWaitToPanicEndList) {
 				if (g->m_animationStatus != GhostObj::AnimationStatus::panicEnd) {
-					return;
+					continue;
 				}
 				g->setAnimationStatus(GhostObj::AnimationStatus::normal);
 				g->setMoveStatus(GhostObj::MoveStatus::chase);
@@ -54,14 +63,15 @@ public:
 		});
 		t.detach();
 	}
-	void drawAllGhost(){
+	void drawAllGhost(const bool& needUpdate){
 		for (auto& g: m_ghostList) {
 			handleGhostMoveStatus(*g);
-			g->drawSelf();
+			g->drawSelf(needUpdate);
 		}
 	};
 	void setGhostTargetWhenChase(GhostObj& ghost) {	
 		const Position& pacmanPos = m_pacman.getPacmanPos();
+		const Position pacmanSymmetricPos =MAP_CENTER_POS* 2 - pacmanPos;
 		switch (ghost.m_color) {
 			case GhostObj::GhostColor::blinky: {
 				ghost.setTargetPos(pacmanPos);
@@ -73,27 +83,11 @@ public:
 				break;
 			}
 			case GhostObj::GhostColor::inky: {
-				auto powerSize = m_powerList.size();
-				if (powerSize <= 1) {
-					ghost.setTargetPos(pacmanPos);
-					return;
-				}
-				int minIndex = 0;
-				int minDistance = m_maxIntValue;
-				for (int i = 0; i < powerSize; i++) {
-					int diff = (pacmanPos - (m_powerList[i].m_pos)).getDistance();
-					if (diff < minDistance) {
-						minIndex = i;
-						minDistance = diff;
-					}
-				}
-				Position closestPowerToPacman = m_powerList[minIndex].m_pos;
-				ghost.setTargetPos(closestPowerToPacman);
+				ghost.setTargetPos(pacmanSymmetricPos.flipByXAxis(MAP_CENTER_POS));
 				break;
 			}
 			case GhostObj::GhostColor::clyde: {
-				Direction pacmanOppositeDir = m_pacman.m_currentDirection*-4;
-				ghost.setTargetPos(m_pacman.m_pos + pacmanOppositeDir);
+				ghost.setTargetPos(pacmanSymmetricPos.flipByYAxis(MAP_CENTER_POS));
 				break;
 			}
 		}
@@ -155,9 +149,15 @@ public:
 		m_mapManager(mapManager),
 		m_sprite(sprite),
 		m_powerList(powerList),
-		m_blinky(GhostObj::GhostColor::blinky, mapManager, sprite)
+		m_blinky(GhostObj::GhostColor::blinky, mapManager, sprite),
+		m_pinky(GhostObj::GhostColor::pinky, mapManager, sprite),
+		m_inky(GhostObj::GhostColor::inky, mapManager, sprite),
+		m_clyde(GhostObj::GhostColor::clyde, mapManager, sprite)
 	{
 		m_ghostList.reserve(4);
-		m_ghostList.push_back(&m_blinky); 
+		m_ghostList.push_back(&m_blinky);
+		m_ghostList.push_back(&m_pinky);
+		m_ghostList.push_back(&m_inky);
+		m_ghostList.push_back(&m_clyde);
 	}
 };

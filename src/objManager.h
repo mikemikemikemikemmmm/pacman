@@ -7,6 +7,7 @@
 #include "global.h"
 #include "gameStatus.h"
 #include "ghostManager.h"
+#include "audioManager.h"
 #include "mapManager.h"
 #include "./obj/wall.h"
 #include "./obj/power.h"
@@ -16,12 +17,13 @@
 class ObjManager {
 public:
 	const Texture2D& m_sprite;
-	const GameStatusManager& m_gameStatusManager;
 	const MapManager& m_mapManager;
+	 GameStatusManager& m_gameStatusManager;
+	 AudioManager& m_audioManager;
 	std::unique_ptr<GhostManager> m_ghostManager;
-	PacmanObj m_pacman;
 	std::vector<PowerObj> m_powerList;
 	std::vector<WallObj> m_wallList;
+	PacmanObj m_pacman;
 	void handleKeyPressed(const Direction& dir){
 		m_pacman.setNextTurnDirection(dir);
 	}
@@ -30,15 +32,18 @@ public:
 		checkPacmanMeetGhost();
 	};
 	void drawAllObj() {
-		checkEvent();
+		const bool needUpdate = m_gameStatusManager.isPlaying();
+		if (needUpdate) {
+			checkEvent();
+		}
 		for (WallObj& w : m_wallList) {
-			w.drawSelf();
+			w.drawSelf(needUpdate);
 		};
 		for (PowerObj& p : m_powerList) {
-			p.drawSelf();
+			p.drawSelf(needUpdate);
 		};
-		m_ghostManager->drawAllGhost();
-		m_pacman.drawSelf();
+		m_ghostManager->drawAllGhost(needUpdate);
+		m_pacman.drawSelf(needUpdate);
 	}
 	static bool checkTouchByTwoObj(const BaseObj& o1,const BaseObj& o2) {
 		if (o1.m_pos.x == o2.m_pos.x) {
@@ -84,19 +89,21 @@ public:
 			};
 		};
 	void handleGameOver() {
-
+		m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Gameover);
 	}
 	void handleGameWin() {
-
+		m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Win);
 	}
 	ObjManager(
-		const GameStatusManager& gameStatusManager,
+		AudioManager& audioManager,
+		GameStatusManager& gameStatusManager,
 		const MapManager& mapManager,
 		const Texture2D& sprite,
 		const PacmanObj& pacman,
 		const std::vector<WallObj>& wallList,
 		const std::vector<PowerObj>& powerList
 	) :
+		m_audioManager(audioManager),
 		m_gameStatusManager(gameStatusManager),
 		m_mapManager(mapManager),
 		m_sprite(sprite),

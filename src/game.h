@@ -9,26 +9,31 @@
 #include "global.h"
 #include "utils.h"
 #include "mapManager.h"
+#include "audioManager.h"
 #include "objManager.h"
 #include "obj/wall.h"
 #include "obj/pacman.h"
 class Game {
 private:
-     Texture2D m_sprite;
+    Texture2D m_sprite;
+    Font font;
+    GameStatusManager m_gameStatusManager;
+    AudioManager m_audioManager;
     MapManager m_mapManager{defaultGameMap};
     std::unique_ptr<ObjManager> m_objManager;
-    GameStatusManager m_gameStatusManager;
     std::chrono::time_point<std::chrono::steady_clock> m_previousTime;
 	long long m_lag = 0;
 	void initGameWindow() {
 		InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "pacman");
 		SetTargetFPS(TARGET_FPS);
         m_sprite = LoadTexture("resources/pacman3.png");
+        font = LoadFont("resources/font2.ttf");
         std::srand(time(NULL));
 	};
     void initStatus() {
         m_previousTime =std::chrono::steady_clock::now();
         m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Starting);
+        //m_audioManager.playMusic("pacmanRun",true);
     }
     void initObj() {
         const char wallChar = m_mapManager.tranMapTypeToChar(MapCellType::Wall);
@@ -54,27 +59,75 @@ private:
             m_mapManager,
             m_sprite
         };
-        m_objManager = std::make_unique<ObjManager>( m_gameStatusManager, m_mapManager, m_sprite, pacman, wallList, powerList );
+        m_objManager = std::make_unique<ObjManager>( 
+            m_audioManager,
+            m_gameStatusManager,
+            m_mapManager, 
+            m_sprite,
+            pacman,
+            wallList, 
+            powerList
+        );
     }
     void handleInput() {
-        if (IsKeyPressed(KEY_RIGHT)) {
-            m_objManager->handleKeyPressed(directionRight);
+        if (m_gameStatusManager.isPlaying()) {
+            if (IsKeyPressed(KEY_RIGHT)) {
+                m_objManager->handleKeyPressed(directionRight);
+            }
+            else if (IsKeyPressed(KEY_LEFT)) {
+                m_objManager->handleKeyPressed(directionLeft);
+            }
+            else if (IsKeyPressed(KEY_UP)) {
+                m_objManager->handleKeyPressed(directionUp);
+            }
+            else if (IsKeyPressed(KEY_DOWN)) {
+                m_objManager->handleKeyPressed(directionDown);
+            }
+            else if (IsKeyPressed(KEY_ENTER)) {
+                m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Pause);
+            }
         }
-        else if (IsKeyPressed(KEY_LEFT)) {
-            m_objManager->handleKeyPressed(directionLeft);
+        else if (m_gameStatusManager.isPaused()) {
+            if (IsKeyPressed(KEY_ENTER)) {
+                m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Playing);
+            }
         }
-        else if (IsKeyPressed(KEY_UP)) {
-            m_objManager->handleKeyPressed(directionUp);
+        else if (m_gameStatusManager.isGameWin()|| m_gameStatusManager.isGameOver()) {
+            if (IsKeyPressed(KEY_ENTER)) {
+                handleNewGame();
+            }
         }
-        else if (IsKeyPressed(KEY_DOWN)) {
-            m_objManager->handleKeyPressed(directionDown);
-        };
     }
-    void handleStartPlayGame() {
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-        m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Playing);
+    void renderText() {
+        std::string textContent="";
+        Color textColor= YELLOW;
+        if (m_gameStatusManager.isStart()) {
+            textContent = "READY!";
+            textColor = YELLOW;
+        }
+        if (m_gameStatusManager.isPaused()) {
+            textContent = "PAUSED!";
+            textColor = YELLOW;
+        }
+        if (m_gameStatusManager.isGameWin()) {
+            textContent = "YOU WIN!";
+            textColor = YELLOW;
+        }
+        if (m_gameStatusManager.isGameOver()) {
+            textContent = "GAME OVER!";
+            textColor = YELLOW;
+        }
+        DrawTextEx(font, textContent.c_str(), tranPosToVec2({
+        MAP_CENTER_POS.x - TEXT_SIZE* static_cast<int>(textContent.size()/3),
+        MAP_CENTER_POS.y - TEXT_SIZE,
+            }), TEXT_SIZE, 0, textColor);
     }
 	void handleGameLoop() {
+        std::thread t([this]() {
+            std::this_thread::sleep_for(std::chrono::seconds(GHOST_stayAtStartPos_SECOND));
+            this->m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Playing);
+        });
+        t.detach();
         while(!WindowShouldClose()){
             const std::chrono::time_point<std::chrono::steady_clock> currentTime =
                 std::chrono::steady_clock::now();
@@ -85,27 +138,32 @@ private:
 
             while (m_lag >= FRAME_COST_MILLSECOND) {
                 m_lag = 0;
-                //if (m_gameStatusManager->gameStatus == GameStatusManager::GameStatus::Playing)  {
-                    handleInput();
-                //}
+                handleInput();
                 BeginDrawing();
                 ClearBackground(BLACK);
                 m_objManager->drawAllObj();
+                renderText();
                 EndDrawing();
             }
+        }
+        if (WindowShouldClose()) {
+            handleCloseWindow();
         }
 	}
     void handleCloseWindow() {
         UnloadTexture(m_sprite);
+        UnloadFont(font);
         CloseWindow();
+    }
+    void handleNewGame() {
+        initStatus();
+        initObj();
+        handleGameLoop();
     }
 public:
 	Game()
     {
 		initGameWindow();
-        initStatus();
-        initObj();
-        handleGameLoop();
-        handleCloseWindow();
+        handleNewGame();
 	}
 };
