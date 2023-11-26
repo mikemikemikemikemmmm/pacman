@@ -25,10 +25,10 @@ private:
 	};
 public:
 	const MapType m_map;
-	const char tranMapTypeToChar(const MapCellType& cellType) const{
+	const char tranMapTypeToChar(const MapCellType& cellType) const {
 		return static_cast<char>(cellType);
 	};
-	const bool canMoveAtPosition(const Position& pos,const bool& canMoveDoor) const {
+	const bool canMoveAtPosition(const Position& pos, const bool& canMoveDoor) const {
 		const int x = pos.x;
 		const int y = pos.y;
 		//minus 1 due to origin position have one pixel.

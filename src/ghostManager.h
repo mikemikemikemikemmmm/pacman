@@ -22,7 +22,7 @@ public:
 	GhostObj m_pinky;
 	GhostObj m_inky;
 	GhostObj m_clyde;
-	void handlePacmanEatPower() { 
+	void handlePacmanEatPower() {
 		auto targetGhostPtrList = std::vector<GhostObj*>();
 		for (auto& g : m_ghostList) {
 			if (g->m_animationStatus != GhostObj::AnimationStatus::die) {
@@ -52,36 +52,36 @@ public:
 				g->setAnimationStatus(GhostObj::AnimationStatus::normal);
 				g->setMoveStatus(GhostObj::MoveStatus::chase);
 			};
-		});
+			});
 		t.detach();
 	}
-	void drawAllGhost(const bool& needUpdate){
-		for (auto& g: m_ghostList) {
+	void drawAllGhost(const bool& needUpdate) {
+		for (auto& g : m_ghostList) {
 			handleGhostMoveStatus(*g);
 			g->drawSelf(needUpdate);
 		}
 	};
-	void setGhostTargetWhenChase(GhostObj& ghost) {	
+	void setGhostTargetWhenChase(GhostObj& ghost) {
 		const Position& pacmanPos = m_pacman.getPacmanPos();
-		const Position pacmanSymmetricPos =MAP_CENTER_POS* 2 - pacmanPos;
+		const Position pacmanSymmetricPos = MAP_CENTER_POS * 2 - pacmanPos;
 		switch (ghost.m_color) {
-			case GhostObj::GhostColor::blinky: {
-				ghost.setTargetPos(pacmanPos);
-				break;
-			}
-			case GhostObj::GhostColor::pinky: {
-				Position targetPos = { pacmanPos * 2 - m_blinky.m_pos };
-				ghost.setTargetPos(targetPos);
-				break;
-			}
-			case GhostObj::GhostColor::inky: {
-				ghost.setTargetPos(pacmanSymmetricPos.flipByXAxis(MAP_CENTER_POS));
-				break;
-			}
-			case GhostObj::GhostColor::clyde: {
-				ghost.setTargetPos(pacmanSymmetricPos.flipByYAxis(MAP_CENTER_POS));
-				break;
-			}
+		case GhostObj::GhostColor::blinky: {
+			ghost.setTargetPos(pacmanPos);
+			break;
+		}
+		case GhostObj::GhostColor::pinky: {
+			Position targetPos = { pacmanPos * 2 - m_blinky.m_pos };
+			ghost.setTargetPos(targetPos);
+			break;
+		}
+		case GhostObj::GhostColor::inky: {
+			ghost.setTargetPos(pacmanSymmetricPos.flipByXAxis(MAP_CENTER_POS));
+			break;
+		}
+		case GhostObj::GhostColor::clyde: {
+			ghost.setTargetPos(pacmanSymmetricPos.flipByYAxis(MAP_CENTER_POS));
+			break;
+		}
 		}
 	}
 	void handleGhostMoveStatus(GhostObj& ghost) {
@@ -127,7 +127,7 @@ public:
 		case GhostObj::MoveStatus::panic: {
 			const Position& pacmanPos = m_pacman.getPacmanPos();
 			const Position pacmanToCenterVector = { MAP_CENTER_POS - pacmanPos };
-			const Position mapEdgePos = MAP_CENTER_POS + (pacmanToCenterVector*2);
+			const Position mapEdgePos = MAP_CENTER_POS + (pacmanToCenterVector * 2);
 			ghost.setTargetPos(mapEdgePos);
 			break;
 		}

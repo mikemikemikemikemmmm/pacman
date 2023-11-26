@@ -5,7 +5,7 @@
 class AudioManager {
 private:
 	std::unordered_map<std::string, Sound> m_soundMap;
-	std::string m_currentPlayingSoundName ="";
+	std::string m_currentPlayingSoundName = "";
 public:
 	void playMusic(const std::string& musicName) {
 		const Sound& targetSound = m_soundMap.at(musicName);
@@ -17,7 +17,7 @@ public:
 		PlaySound(targetSound);
 	}
 	void stopPlayingMusic() {
-		if (m_currentPlayingSoundName =="") {
+		if (m_currentPlayingSoundName == "") {
 			return;
 		}
 		const Sound& currentSound = m_soundMap.at(m_currentPlayingSoundName);
@@ -29,7 +29,7 @@ public:
 	}
 	AudioManager() {
 		InitAudioDevice();
-		m_soundMap ={
+		m_soundMap = {
 			{"gameStart",LoadSound("resources/gameStart.wav")},
 			{"eatGhost",LoadSound("resources/eatGhost.wav")},
 			{"gameOver",LoadSound("resources/gameOver.wav")},
