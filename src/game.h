@@ -29,12 +29,12 @@ private:
 		SetTargetFPS(TARGET_FPS);
         m_sprite = LoadTexture("resources/pacman3.png");
         font = LoadFont("resources/font2.ttf");
-        std::srand(time(NULL));
+        std::srand(static_cast<unsigned int>(time(NULL)));
 	};
     void initStatus() {
         m_previousTime =std::chrono::steady_clock::now();
         m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Starting);
-        //m_audioManager.playMusic("pacmanRun",true);
+        m_audioManager.stopPlayingMusic();
     }
     void initObj() {
         const char wallChar = m_mapManager.tranMapTypeToChar(MapCellType::Wall);
@@ -125,10 +125,11 @@ private:
     }
 	void handleGameLoop() {
         std::thread t([this]() {
-            std::this_thread::sleep_for(std::chrono::seconds(GHOST_stayAtStartPos_SECOND));
+            std::this_thread::sleep_for(std::chrono::seconds(GAME_START_READY_WAIT_SECOND));
             this->m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Playing);
         });
         t.detach();
+        m_audioManager.playMusic("gameStart");
         while(!WindowShouldClose()){
             const std::chrono::time_point<std::chrono::steady_clock> currentTime =
                 std::chrono::steady_clock::now();

@@ -5,27 +5,25 @@
 class AudioManager {
 private:
 	std::unordered_map<std::string, Sound> m_soundMap;
-	std::string m_currentPlayingSoundName;
+	std::string m_currentPlayingSoundName ="";
 public:
 	void playMusic(const std::string& musicName) {
-		if (musicName == m_currentPlayingSoundName) {
+		const Sound& targetSound = m_soundMap.at(musicName);
+		if (musicName == m_currentPlayingSoundName && IsSoundPlaying(targetSound)) {
 			return;
 		}
-		if (isPlayingMusic()) {
-			stopMusic();
-		}
-		Sound& targetSound = m_soundMap.at(musicName);
+		stopPlayingMusic();
 		m_currentPlayingSoundName = musicName;
 		PlaySound(targetSound);
 	}
-	bool isPlayingMusic() const {
-		return m_currentPlayingSoundName != "";
-	}
-	void stopMusic() {
-		if (!isPlayingMusic()) {
+	void stopPlayingMusic() {
+		if (m_currentPlayingSoundName =="") {
 			return;
 		}
 		const Sound& currentSound = m_soundMap.at(m_currentPlayingSoundName);
+		if (!IsSoundPlaying(currentSound)) {
+			return;
+		}
 		StopSound(currentSound);
 		m_currentPlayingSoundName = "";
 	}
@@ -34,13 +32,14 @@ public:
 		m_soundMap ={
 			{"gameStart",LoadSound("resources/gameStart.wav")},
 			{"eatGhost",LoadSound("resources/eatGhost.wav")},
-			{"die",LoadSound("resources/die.wav")},
+			{"gameOver",LoadSound("resources/gameOver.wav")},
 			{"gameWin",LoadSound("resources/gameWin.wav")},
 			{"pacmanRun",LoadSound("resources/pacmanRun.wav")},
+			{"eatPower",LoadSound("resources/eatPower.wav")},
 		};
 	}
 	~AudioManager() {
-		stopMusic();
+		stopPlayingMusic();
 		for (auto& soundPair : m_soundMap) {
 			UnloadSound(soundPair.second);
 		}

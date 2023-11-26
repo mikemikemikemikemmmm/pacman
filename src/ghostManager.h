@@ -22,13 +22,6 @@ public:
 	GhostObj m_pinky;
 	GhostObj m_inky;
 	GhostObj m_clyde;
-	void handlePacmanMeetGhost(GhostObj& g) const  {
-		if (g.m_animationStatus == GhostObj::AnimationStatus::panic||
-			g.m_animationStatus == GhostObj::AnimationStatus::panicEnd) {
-			g.setAnimationStatus(GhostObj::AnimationStatus::die);
-			g.setMoveStatus(GhostObj::MoveStatus::die);
-		}
-	}
 	void handlePacmanEatPower() { 
 		auto targetGhostPtrList = std::vector<GhostObj*>();
 		for (auto& g : m_ghostList) {

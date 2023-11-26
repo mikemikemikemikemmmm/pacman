@@ -48,7 +48,8 @@ public:
 		if (!isGameOver) {
 			m_ghostManager->drawAllGhost(isPlaying);
 		}
-		m_pacman.drawSelf(isPlaying);
+		m_pacman.drawSelf(isPlaying || isGameOver);
+
 	}
 	static bool checkTouchByTwoObj(const BaseObj& o1,const BaseObj& o2) {
 		if (o1.m_pos.x == o2.m_pos.x) {
@@ -78,6 +79,7 @@ public:
 				}
 			}
 			if (powerPtrBeEaten.has_value()) {
+				m_audioManager.playMusic("eatPower");
 				m_powerList.remove(*(powerPtrBeEaten.value()));
 				m_ghostManager->handlePacmanEatPower();
 				if (m_powerList.empty()) {
@@ -92,18 +94,25 @@ public:
 					if (g->m_moveStatus == GhostObj::MoveStatus::chase) {
 						handleGameOver();
 					}
-					else {
-						m_ghostManager->handlePacmanMeetGhost(*g);
-					};
+					else if (
+						g->m_animationStatus == GhostObj::AnimationStatus::panic ||
+						g->m_animationStatus == GhostObj::AnimationStatus::panicEnd
+						) {
+						g->setAnimationStatus(GhostObj::AnimationStatus::die);
+						g->setMoveStatus(GhostObj::MoveStatus::die);
+						m_audioManager.playMusic("eatGhost");
+					}
 				};
 			};
 		};
 	void handleGameOver() {
-		m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Gameover);
 		m_pacman.setCurrentAnimation(PacmanObj::m_animationDataMap.at("die"));
+		m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Gameover);
+		m_audioManager.playMusic("gameOver");
 	}
 	void handleGameWin() {
 		m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Win);
+		m_audioManager.playMusic("gameWin");
 	}
 	ObjManager(
 		AudioManager& audioManager,

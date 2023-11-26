@@ -21,12 +21,12 @@ constexpr int SCREEN_HEIGHT = (MAP_HEIGHT-1) * CELL_SIZE;
 constexpr int SCREEN_WIDTH = MAP_WIDTH * CELL_SIZE;
 constexpr int TARGET_FPS = 60;
 constexpr int FRAME_COST_MILLSECOND = 30;
-constexpr int OBJ_MEET_MAX_DISTANCE = 11;
 constexpr int TEXT_SIZE = 50;
 constexpr int GAME_START_READY_WAIT_SECOND = 4;
 //speed , must be divisible by CELL_SIZE
-constexpr int PACMAN_SPEED = 5;
+constexpr int PACMAN_SPEED = 6;
 constexpr int GHOST_SPEED = 6;
+constexpr int OBJ_MEET_MAX_DISTANCE = GHOST_SPEED+ PACMAN_SPEED;
 
 //direction
 struct Direction {
@@ -210,6 +210,12 @@ struct AnimationData {
     float startSpriteY;
     unsigned short totalFrame;
     bool isReapted;
+    bool operator==(const AnimationData& other)const {
+        return this->startSpriteX == other.startSpriteX &&
+            this->startSpriteY == other.startSpriteY &&
+            this->totalFrame == other.totalFrame &&
+            this->isReapted == other.isReapted;
+    };
 };
 typedef std::unordered_map<std::string, AnimationData> AnimationDataMap;
 struct SpriteXY {
