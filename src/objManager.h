@@ -91,7 +91,7 @@ public:
 			auto& ghostList = m_ghostManager->m_ghostList;
 			for (auto& g : ghostList) {
 				if (this->checkTouchByTwoObj(*g, m_pacman)) {
-					if (g->m_moveStatus == GhostObj::MoveStatus::chase) {
+					if (g->m_animationStatus == GhostObj::AnimationStatus::normal) {
 						handleGameOver();
 					}
 					else if (
