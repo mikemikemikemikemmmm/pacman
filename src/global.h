@@ -8,27 +8,22 @@
 #include <chrono>
 #define LOG(e) std::cout <<e<<std::endl;
 #define LOG2(e,a) std::cout <<e<<" , " << a <<std::endl;
-
-
-
 //system
 constexpr int CELL_SIZE = 30;
 constexpr int SPRITE_SIZE = 20;
 constexpr int SPRITE_START_X = ((CELL_SIZE - SPRITE_SIZE) / 2);
 constexpr int SPRITE_START_Y = ((CELL_SIZE - SPRITE_SIZE) / 2);
-constexpr unsigned int MAP_HEIGHT = 30;
-constexpr unsigned int MAP_WIDTH = 27;
-constexpr unsigned int MAP_MAX_X = MAP_WIDTH * CELL_SIZE;
-constexpr unsigned int MAP_MAX_Y = MAP_HEIGHT * CELL_SIZE;
-constexpr unsigned int SCREEN_HEIGHT = (MAP_HEIGHT-1) * CELL_SIZE;
-constexpr unsigned int SCREEN_WIDTH = MAP_WIDTH * CELL_SIZE;
-constexpr unsigned int TARGET_FPS = 60;
-constexpr unsigned int FRAME_COST_MILLSECOND = 30;
+constexpr int MAP_HEIGHT = 30;
+constexpr int MAP_WIDTH = 27;
+constexpr int MAP_MAX_X = MAP_WIDTH * CELL_SIZE;
+constexpr int MAP_MAX_Y = MAP_HEIGHT * CELL_SIZE;
+constexpr int SCREEN_HEIGHT = (MAP_HEIGHT-1) * CELL_SIZE;
+constexpr int SCREEN_WIDTH = MAP_WIDTH * CELL_SIZE;
+constexpr int TARGET_FPS = 60;
+constexpr int FRAME_COST_MILLSECOND = 30;
 constexpr int OBJ_MEET_MAX_DISTANCE = 11;
-
-//font
-constexpr int TEXT_SIZE = 70;
-
+constexpr int TEXT_SIZE = 50;
+constexpr int GAME_START_READY_WAIT_SECOND = 4;
 //speed , must be divisible by CELL_SIZE
 constexpr int PACMAN_SPEED = 5;
 constexpr int GHOST_SPEED = 6;

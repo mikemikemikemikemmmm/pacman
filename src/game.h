@@ -4,6 +4,7 @@
 #include <chrono>
 #include <thread>
 #include <ctime> 
+#include<forward_list>
 #include "../lib/raylib/include/raylib.h"
 #include "gameStatus.h"
 #include "global.h"
@@ -39,7 +40,8 @@ private:
         const char wallChar = m_mapManager.tranMapTypeToChar(MapCellType::Wall);
         const char powerChar = m_mapManager.tranMapTypeToChar(MapCellType::Power);
         auto wallList = std::vector<WallObj>();
-        auto powerList = std::vector<PowerObj>();
+        auto powerList = std::forward_list<PowerObj>();
+        auto powerListIt =  powerList.before_begin();
         for (int row = 0; row < m_mapManager.m_map.size(); row++) {
             for (int col = 0; col < m_mapManager.m_map[0].size(); col++) {
                 if (m_mapManager.m_map[row][col] == wallChar) {
@@ -50,7 +52,7 @@ private:
                 else if (m_mapManager.m_map[row][col] == powerChar) {
                     const int x = col * CELL_SIZE;
                     const int y = row * CELL_SIZE;
-                    powerList.emplace_back(Position{ x,y }, m_sprite);
+                     powerList.emplace_after(powerListIt, Position{ x,y }, m_sprite);
                 }
             }
         }
@@ -98,29 +100,28 @@ private:
             }
         }
     }
-    void renderText() {
-        std::string textContent="";
-        Color textColor= YELLOW;
+    void renderText(const std::vector<std::string>& contentList) {
+        const int contentListSize = static_cast<int>(contentList.size());
+        for (int i = 0; i < contentListSize;i++) {
+            DrawTextEx(font, contentList[i].c_str(), tranPosToVec2({
+            MAP_CENTER_POS.x - TEXT_SIZE * static_cast<int>(contentList[i].size() / 3),
+            MAP_CENTER_POS.y - TEXT_SIZE * (contentListSize-i-1),
+                }), TEXT_SIZE, 0, YELLOW);
+        }
+    }
+    void handleRenderText() {
         if (m_gameStatusManager.isStart()) {
-            textContent = "READY!";
-            textColor = YELLOW;
+            renderText({ "READY!" });
         }
-        if (m_gameStatusManager.isPaused()) {
-            textContent = "PAUSED!";
-            textColor = YELLOW;
+        else if (m_gameStatusManager.isPaused()) {
+            renderText({ "PAUSED!","","PRESS ENTER","","TO PLAY"});
         }
-        if (m_gameStatusManager.isGameWin()) {
-            textContent = "YOU WIN!";
-            textColor = YELLOW;
+        else if (m_gameStatusManager.isGameWin()) {
+            renderText({ "YOU WIN!","","PRESS ENTER TO START","", "A NEW GAME"});
         }
-        if (m_gameStatusManager.isGameOver()) {
-            textContent = "GAME OVER!";
-            textColor = YELLOW;
+        else if (m_gameStatusManager.isGameOver()) {
+            renderText({ "GAME OVER!","","PRESS ENTER TO START","","A NEW GAME"});
         }
-        DrawTextEx(font, textContent.c_str(), tranPosToVec2({
-        MAP_CENTER_POS.x - TEXT_SIZE* static_cast<int>(textContent.size()/3),
-        MAP_CENTER_POS.y - TEXT_SIZE,
-            }), TEXT_SIZE, 0, textColor);
     }
 	void handleGameLoop() {
         std::thread t([this]() {
@@ -142,7 +143,7 @@ private:
                 BeginDrawing();
                 ClearBackground(BLACK);
                 m_objManager->drawAllObj();
-                renderText();
+                handleRenderText();
                 EndDrawing();
             }
         }

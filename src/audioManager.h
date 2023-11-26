@@ -4,21 +4,19 @@
 #include "../lib/raylib/include/raylib.h"
 class AudioManager {
 private:
-	std::unordered_map<std::string, Music > m_soundMap;
+	std::unordered_map<std::string, Sound> m_soundMap;
 	std::string m_currentPlayingSoundName;
-	bool reapted = false;
 public:
-	void playMusic(const std::string& musicName,const bool& isLoop) {
+	void playMusic(const std::string& musicName) {
 		if (musicName == m_currentPlayingSoundName) {
 			return;
 		}
 		if (isPlayingMusic()) {
 			stopMusic();
 		}
-		Music& targetMusic = m_soundMap.at(musicName);
+		Sound& targetSound = m_soundMap.at(musicName);
 		m_currentPlayingSoundName = musicName;
-		targetMusic.looping = isLoop;
-		PlayMusicStream(targetMusic);
+		PlaySound(targetSound);
 	}
 	bool isPlayingMusic() const {
 		return m_currentPlayingSoundName != "";
@@ -27,24 +25,24 @@ public:
 		if (!isPlayingMusic()) {
 			return;
 		}
-		const Music& currentMusic = m_soundMap.at(m_currentPlayingSoundName);
-		StopMusicStream(currentMusic);
+		const Sound& currentSound = m_soundMap.at(m_currentPlayingSoundName);
+		StopSound(currentSound);
 		m_currentPlayingSoundName = "";
 	}
 	AudioManager() {
 		InitAudioDevice();
-		m_soundMap ={/*
-			{"gameStart",LoadMusicStream("resources/gameStart.wav")},
-			{"eatGhost",LoadMusicStream("resources/eatGhost.wav")},
-			{"die",LoadMusicStream("resources/die.wav")},
-			{"gameWin",LoadMusicStream("resources/gameWin.wav")},*/
-			{"pacmanRun",LoadMusicStream("resources/pacmanRun.mp3")},
+		m_soundMap ={
+			{"gameStart",LoadSound("resources/gameStart.wav")},
+			{"eatGhost",LoadSound("resources/eatGhost.wav")},
+			{"die",LoadSound("resources/die.wav")},
+			{"gameWin",LoadSound("resources/gameWin.wav")},
+			{"pacmanRun",LoadSound("resources/pacmanRun.wav")},
 		};
 	}
 	~AudioManager() {
 		stopMusic();
 		for (auto& soundPair : m_soundMap) {
-			UnloadMusicStream(soundPair.second);
+			UnloadSound(soundPair.second);
 		}
 		CloseAudioDevice();
 	}

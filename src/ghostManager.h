@@ -16,7 +16,6 @@ public:
 	const PacmanObj& m_pacman;
 	const MapManager& m_mapManager;
 	const Texture2D& m_sprite;
-	std::vector<PowerObj>& m_powerList;
 	std::vector<GhostObj*> m_ghostList;
 	const static int m_maxIntValue = std::numeric_limits<int>::max();
 	GhostObj m_blinky;
@@ -126,6 +125,7 @@ public:
 			if (startPos == ghost.m_pos) {  // after be eaten and back to start pos.
 				ghost.setMoveStatus(GhostObj::MoveStatus::stayAtStartPos);
 				ghost.setAnimationStatus(GhostObj::AnimationStatus::normal);
+				ghost.setSpeed(0);
 				return;
 			}
 			ghost.setTargetPos(startPos);
@@ -143,12 +143,10 @@ public:
 	GhostManager(
 		const PacmanObj& pacman,
 		const MapManager& mapManager,
-		const Texture2D& sprite,
-		std::vector<PowerObj>& powerList) :
+		const Texture2D& sprite) :
 		m_pacman(pacman),
 		m_mapManager(mapManager),
 		m_sprite(sprite),
-		m_powerList(powerList),
 		m_blinky(GhostObj::GhostColor::blinky, mapManager, sprite),
 		m_pinky(GhostObj::GhostColor::pinky, mapManager, sprite),
 		m_inky(GhostObj::GhostColor::inky, mapManager, sprite),
