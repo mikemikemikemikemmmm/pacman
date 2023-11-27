@@ -38,8 +38,11 @@ public:
 				if (g->m_animationStatus != GhostObj::AnimationStatus::panic) {
 					continue;
 				}
-				ghostWaitToPanicEndList.push_back(g);
-				g->setAnimationStatus(GhostObj::AnimationStatus::panicEnd);
+				else {
+					ghostWaitToPanicEndList.push_back(g);
+					g->setAnimationStatus(GhostObj::AnimationStatus::panicEnd);
+					g->setMoveStatus(GhostObj::MoveStatus::panic);
+				}
 			};
 			if (ghostWaitToPanicEndList.empty()) {
 				return;
@@ -49,8 +52,10 @@ public:
 				if (g->m_animationStatus != GhostObj::AnimationStatus::panicEnd) {
 					continue;
 				}
-				g->setAnimationStatus(GhostObj::AnimationStatus::normal);
-				g->setMoveStatus(GhostObj::MoveStatus::chase);
+				else {
+					g->setAnimationStatus(GhostObj::AnimationStatus::normal);
+					g->setMoveStatus(GhostObj::MoveStatus::chase);
+				}
 			};
 			});
 		t.detach();
