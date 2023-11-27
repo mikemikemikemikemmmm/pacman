@@ -147,11 +147,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\audioManager.cpp" />
+    <ClCompile Include="src\game.cpp" />
     <ClCompile Include="src\game3.cpp" />
+    <ClCompile Include="src\gameStatus.cpp" />
+    <ClCompile Include="src\ghostManager.cpp" />
+    <ClCompile Include="src\global.cpp" />
+    <ClCompile Include="src\mapManager.cpp" />
+    <ClCompile Include="src\objManager.cpp" />
     <ClCompile Include="src\objManager.h" />
+    <ClCompile Include="src\obj\animatedObj.cpp" />
     <ClCompile Include="src\obj\animatedObj.h" />
+    <ClCompile Include="src\obj\base.cpp" />
     <ClCompile Include="src\obj\ghost.cpp" />
     <ClCompile Include="src\obj\pacman.cpp" />
+    <ClCompile Include="src\obj\power.cpp" />
+    <ClCompile Include="src\obj\wall.cpp" />
     <ClCompile Include="src\utils.cpp" />
   </ItemGroup>
   <ItemGroup>

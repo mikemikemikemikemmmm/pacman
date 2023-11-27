@@ -25,51 +25,22 @@ constexpr int TEXT_SIZE = 50;
 constexpr int GAME_START_READY_WAIT_SECOND = 4;
 //speed , must be divisible by CELL_SIZE
 constexpr int PACMAN_SPEED = 6;
-constexpr int GHOST_SPEED = 6;
+constexpr int GHOST_SPEED = 5;
 constexpr int OBJ_MEET_MAX_DISTANCE = GHOST_SPEED + PACMAN_SPEED;
 
 //direction
 struct Direction {
 	int x;
 	int y;
-	bool operator==(const Direction& other) const {
-		return other.x == x && other.y == y;
-	}
-	bool operator!=(const Direction& other) const {
-		return other.x != x || other.y != y;
-	}
-	Direction operator*(const int& val) const {
-		return Direction{ this->x * val,this->y * val };
-	}
+	bool operator==(const Direction& other) const;
+	bool operator!=(const Direction& other) const;
+	Direction operator*(const int& val) const;
 	friend std::ostream& operator<<(std::ostream& os, const Direction& dir) {
 		os << dir.getType();
 		return os;
 	}
-	std::string getAxis()const {
-		if (std::abs(this->x) > 0) {
-			return "x";
-		}
-		else {
-			return "y";
-		}
-	}
-	std::string getType() const {
-		if (this->x == 0 && this->y == 0) {
-			return "stay";
-		}
-		else if (this->x == 0 && this->y > 0) {
-			return "down";
-		}
-		else if (this->x == 0 && this->y < 0) {
-			return "up";
-		}
-		else if (this->x < 0 && this->y == 0) {
-			return "left";
-		}
-		else {
-			return "right";
-		}
-	}
+	std::string getAxis()const;
+	std::string getType() const;
 };
 constexpr Direction directionUp{ 0,-1 };
 constexpr Direction directionDown{ 0,1 };
@@ -81,57 +52,17 @@ const std::array<Direction, 4> fourDirectionArray{ directionUp, directionDown, d
 struct Position {
 	int x;
 	int y;
-	const bool operator==(const Position& other) const {
-		return this->x == other.x && this->y == other.y;
-	};
-	const bool operator!=(const Position& other) const {
-		return this->x != other.x || this->y != other.y;
-	};
-	friend std::ostream& operator<<(std::ostream& os, const Position& pos) {
-		os << "X:" << pos.x << " , Y:" << pos.y;
-		return os;
-	}
-	Position operator-(const Position& other) const {
-		return Position{
-			this->x - other.x,
-			this->y - other.y };
-	}
-	Position operator*(const int& val) const {
-		return Position{
-			this->x * val,
-			this->y * val
-		};
-	}
-	Position operator+(const Direction& dir) const {
-		return Position{
-			this->x + dir.x,
-			this->y + dir.y
-		};
-	}
-	Position operator+(const Position& pos) const {
-		return Position{
-			this->x + pos.x,
-			this->y + pos.y
-		};
-	}
-	Position* operator+=(const Position& pos) {
-		this->x += pos.x;
-		this->y += pos.y;
-		return this;
-	}
-	int getDistance() const {
-		return this->x * this->x + this->y * this->y;
-	}
-	Direction tranToDir() const {
-		const int total = this->x + this->y;
-		return { this->x / total,this->y / total };
-	}
-	Position flipByYAxis(const Position& axisPos)const {
-		return Position{ 2 * axisPos.x - this->x,this->y };
-	}
-	Position flipByXAxis(const Position& axisPos)const {
-		return Position{ this->x,2 * axisPos.y - this->y };
-	}
+	const bool operator==(const Position& other) const;
+	const bool operator!=(const Position& other) const;
+	Position operator-(const Position& other) const;
+	Position operator*(const int& val) const;
+	Position operator+(const Direction& dir) const;
+	Position operator+(const Position& pos) const;
+	Position* operator+=(const Position& pos);
+	int getDistance() const;
+	Direction tranToDir() const;
+	Position flipByYAxis(const Position& axisPos)const;
+	Position flipByXAxis(const Position& axisPos)const;
 };
 constexpr Position SPRITE_START_POS = { SPRITE_START_X ,SPRITE_START_Y };
 //map
@@ -139,28 +70,15 @@ class MapIndex {
 public:
 	int x;
 	int y;
-	bool operator==(const MapIndex& other) const {
-		return this->x == other.x && this->y == other.y;
-	};
-	bool operator!=(const MapIndex& other) const {
-		return this->x != other.x || this->y != other.y;
-	};
-	const MapIndex operator-(const MapIndex& other) const {
-		return MapIndex{
-			this->x - other.x,
-			this->y - other.y
-		};
-	};
+	bool operator==(const MapIndex& other) const;
+	bool operator!=(const MapIndex& other) const;
+	const MapIndex operator-(const MapIndex& other) const;
 	friend std::ostream& operator<<(std::ostream& os, const MapIndex& mapIndex) {
 		os << "X:" << mapIndex.x << " , Y:" << mapIndex.y;
 		return os;
 	}
-	int getDistance() const {
-		return x + y;
-	}
-	Position getPosition() const {
-		return Position{ this->x * CELL_SIZE,this->y * CELL_SIZE };
-	}
+	int getDistance() const;
+	Position getPosition() const;
 };
 typedef std::array<std::array<char, MAP_WIDTH>, MAP_HEIGHT> MapType;
 enum class MapCellType :char {
