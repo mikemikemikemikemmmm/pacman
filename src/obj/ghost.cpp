@@ -130,7 +130,7 @@ void GhostObj::setMoveStatus(const MoveStatus& nextStatus) {
 		break;
 	}
 	case MoveStatus::stayAtStartPos: {
-		if (nextStatus != MoveStatus::goOutDoor) {//TODO
+		if (nextStatus != MoveStatus::goOutDoor) {
 			return;
 		}
 		break; }
@@ -224,6 +224,9 @@ Direction GhostObj::getNextPositionDir() {
 		return xDiffDir;
 	}
 	if (canMoveByXDiffDir && canMoveByYDiffDir) {
+		if (m_canMoveDoor) {
+			return yDiffDir;
+		}
 		int randomIndex = std::rand() % 2;
 		if (randomIndex == 1) {
 			return yDiffDir;

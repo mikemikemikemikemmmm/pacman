@@ -1,5 +1,5 @@
 ﻿#include "game.h"
-int main(void) {
+int main() {
 	Game game;
 	return 0;
 }
