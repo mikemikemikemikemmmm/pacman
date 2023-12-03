@@ -6,6 +6,7 @@ void ObjManager::handleKeyPressed(const Direction& dir) {
 void ObjManager::checkEvent() {
 	checkPacmanEatPower();
 	checkPacmanMeetGhost();
+	checkPacmanEatFood();
 }
 
 void ObjManager::drawAllObj() {
@@ -14,29 +15,32 @@ void ObjManager::drawAllObj() {
 	if (isPlaying) {
 		checkEvent();
 	}
-	for (WallObj& w : m_wallList) {
-		w.drawSelf(true);
+	for (const Position& wallPos :m_wallPositionSet) {
+		m_wall.drawSelf(true, wallPos);
 	};
-	for (PowerObj& p : m_powerList) {
-		p.drawSelf(true);
+	for (const Position& powerPos : m_powerPositionSet) {
+		m_power.drawSelf(true, powerPos);
+	};
+	for (const Position& foodPos : m_foodPositionSet) {
+		m_food.drawSelf(true, foodPos);
 	};
 	if (!isGameOver) {
 		m_ghostManager->drawAllGhost(isPlaying);
 	}
-	m_pacman.drawSelf(isPlaying || isGameOver);
+	m_pacman.drawSelf(isPlaying || isGameOver,m_pacman.m_pos);
 }
 
-bool ObjManager::checkTouchByTwoObj(const BaseObj& o1, const BaseObj& o2) {
-	if (o1.m_pos.x == o2.m_pos.x) {
-		return std::abs(o1.m_pos.y - o2.m_pos.y) <= OBJ_MEET_MAX_DISTANCE;
+bool ObjManager::checkTouchByTwoPosition(const Position& p1, const Position& p2) {
+	if (p1.x == p2.x) {
+		return std::abs(p1.y - p2.y) <= OBJ_MEET_MAX_DISTANCE;
 	}
-	else if (o1.m_pos.y == o2.m_pos.y) {
-		return std::abs(o1.m_pos.x - o2.m_pos.x) <= OBJ_MEET_MAX_DISTANCE;
+	else if (p1.y == p2.y) {
+		return std::abs(p1.x - p2.x) <= OBJ_MEET_MAX_DISTANCE;
 	}
 	else if (
 		(
-			std::abs(o1.m_pos.x - o2.m_pos.x) +
-			std::abs(o1.m_pos.y - o2.m_pos.y)
+			std::abs(p1.x - p2.x) +
+			std::abs(p1.y - p2.y)
 			) <= OBJ_MEET_MAX_DISTANCE
 		) {
 		return true;
@@ -47,18 +51,18 @@ bool ObjManager::checkTouchByTwoObj(const BaseObj& o1, const BaseObj& o2) {
 }
 
 void ObjManager::checkPacmanEatPower() {
-	std::optional<PowerObj*> powerPtrBeEaten;
-	for (auto& p : m_powerList) {
-		if (this->checkTouchByTwoObj(p, m_pacman)) {
-			powerPtrBeEaten = &p;
+	std::optional<Position> powerPosBeEaten;
+	for (auto& powerPos : m_powerPositionSet) {
+		if (this->checkTouchByTwoPosition(powerPos, m_pacman.m_pos)) {
+			powerPosBeEaten = powerPos;
 			break;
 		}
 	}
-	if (powerPtrBeEaten.has_value()) {
+	if (powerPosBeEaten.has_value()) {
 		m_audioManager.playMusic("eatPower");
-		m_powerList.remove(*(powerPtrBeEaten.value()));
+		m_powerPositionSet.erase(powerPosBeEaten.value());
 		m_ghostManager->handlePacmanEatPower();
-		if (m_powerList.empty()) {
+		if (m_powerPositionSet.empty()) {
 			handleGameWin();
 		}
 	}
@@ -67,7 +71,7 @@ void ObjManager::checkPacmanEatPower() {
 void ObjManager::checkPacmanMeetGhost() {
 	auto& ghostList = m_ghostManager->m_ghostList;
 	for (auto& g : ghostList) {
-		if (this->checkTouchByTwoObj(*g, m_pacman)) {
+		if (this->checkTouchByTwoPosition((*g).m_pos, m_pacman.m_pos)) {
 			if (g->m_animationStatus == GhostObj::AnimationStatus::normal) {
 				handleGameOver();
 			}
@@ -83,6 +87,20 @@ void ObjManager::checkPacmanMeetGhost() {
 	};
 }
 
+void ObjManager::checkPacmanEatFood()
+{
+	std::optional<Position> foodPosBeEaten;
+	for (auto& foodPos : m_foodPositionSet) {
+		if (this->checkTouchByTwoPosition(foodPos, m_pacman.m_pos)) {
+			foodPosBeEaten = foodPos;
+			break;
+		}
+	}
+	if (foodPosBeEaten.has_value()) {
+		m_foodPositionSet.erase(foodPosBeEaten.value());
+	}
+}
+
 void ObjManager::handleGameOver() {
 	m_pacman.setCurrentAnimation(PacmanObj::m_animationDataMap.at("die"));
 	m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Gameover);
@@ -94,14 +112,26 @@ void ObjManager::handleGameWin() {
 	m_audioManager.playMusic("gameWin");
 }
 
-ObjManager::ObjManager(AudioManager& audioManager, GameStatusManager& gameStatusManager, const MapManager& mapManager, const Texture2D& sprite, const PacmanObj& pacman, const std::vector<WallObj>& wallList, const std::forward_list<PowerObj>& powerList) :
+ObjManager::ObjManager(
+	AudioManager& audioManager,
+	GameStatusManager& gameStatusManager,
+	const MapManager& mapManager,
+	const Texture2D& sprite,
+	const PositionSet& wallPosSet,
+	const PositionSet& powerPosSet,
+	const PositionSet& foodPosSet
+) :
 	m_audioManager(audioManager),
 	m_gameStatusManager(gameStatusManager),
 	m_mapManager(mapManager),
 	m_sprite(sprite),
-	m_pacman(pacman),
-	m_wallList(wallList),
-	m_powerList(powerList)
+	m_wallPositionSet(wallPosSet),
+	m_powerPositionSet(powerPosSet),
+	m_foodPositionSet(foodPosSet),
+	m_wall({ Position{0,0},sprite}),
+	m_power({ Position{0,0},sprite}),
+	m_food({ Position{0,0},sprite}),
+	m_pacman(PACMAN_START_POS,mapManager,sprite)
 {
 	m_ghostManager = std::make_unique<GhostManager>(m_pacman, m_mapManager, m_sprite);
 }

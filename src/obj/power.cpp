@@ -7,8 +7,8 @@ bool PowerObj::operator ==(const PowerObj& other) const {
 bool PowerObj::operator !=(const PowerObj& other) const {
 	return this->m_pos != other.m_pos;
 }
-void PowerObj::drawSelf(const bool& needUpdate) {
-	DrawTextureRec(m_sprite, m_rec, tranPosToVec2(m_pos + SPRITE_START_POS), WHITE);
+void PowerObj::drawSelf(const bool& needUpdate, const Position& pos) {
+	executeDraw(pos);
 }
 
 PowerObj::PowerObj(
@@ -18,6 +18,7 @@ PowerObj::PowerObj(
 	BaseObj(
 		sprite,
 		pos,
-		SpriteXY{ 168,160 },
-		0,
-		directionStay) {};
+		SpriteXY{ 100,160 }
+	) {
+	setSpriteSize(SPRITE_SIZE, SPRITE_SIZE);
+};

@@ -18,36 +18,33 @@ void Game::initStatus() {
 void Game::initObj() {
 	const char wallChar = m_mapManager.tranMapTypeToChar(MapCellType::Wall);
 	const char powerChar = m_mapManager.tranMapTypeToChar(MapCellType::Power);
-	auto wallList = std::vector<WallObj>();
-	auto powerList = std::forward_list<PowerObj>();
-	auto powerListIt = powerList.before_begin();
+	const char foodChar = m_mapManager.tranMapTypeToChar(MapCellType::Food);
+	PositionSet foodPosSet;
+	PositionSet wallPosSet;
+	PositionSet powerPosSet;
 	for (int row = 0; row < m_mapManager.m_map.size(); row++) {
 		for (int col = 0; col < m_mapManager.m_map[0].size(); col++) {
+			const int x = col * CELL_SIZE;
+			const int y = row * CELL_SIZE;
 			if (m_mapManager.m_map[row][col] == wallChar) {
-				const int x = col * CELL_SIZE;
-				const int y = row * CELL_SIZE;
-				wallList.emplace_back(Position{ x,y }, m_sprite);
+				wallPosSet.emplace(Position{x, y});
 			}
 			else if (m_mapManager.m_map[row][col] == powerChar) {
-				const int x = col * CELL_SIZE;
-				const int y = row * CELL_SIZE;
-				powerList.emplace_after(powerListIt, Position{ x,y }, m_sprite);
+				powerPosSet.emplace(Position{ x, y });
+			}
+			else if (m_mapManager.m_map[row][col] == foodChar) {
+				foodPosSet.emplace(Position{ x, y });
 			}
 		}
 	}
-	const PacmanObj pacman{
-		PACMAN_START_POS,
-		m_mapManager,
-		m_sprite
-	};
 	m_objManager = std::make_unique<ObjManager>(
 		m_audioManager,
 		m_gameStatusManager,
 		m_mapManager,
 		m_sprite,
-		pacman,
-		wallList,
-		powerList
+		wallPosSet,
+		powerPosSet,
+		foodPosSet
 	);
 }
 void Game::handleInput() {

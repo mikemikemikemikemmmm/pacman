@@ -112,7 +112,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -148,7 +148,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -171,6 +171,7 @@
     <ClCompile Include="src\obj\animatedObj.cpp" />
     <ClCompile Include="src\obj\animatedObj.h" />
     <ClCompile Include="src\obj\base.cpp" />
+    <ClCompile Include="src\obj\food.cpp" />
     <ClCompile Include="src\obj\ghost.cpp" />
     <ClCompile Include="src\obj\pacman.cpp" />
     <ClCompile Include="src\obj\power.cpp" />
@@ -185,6 +186,7 @@
     <ClInclude Include="src\global.h" />
     <ClInclude Include="src\mapManager.h" />
     <ClInclude Include="src\obj\base.h" />
+    <ClInclude Include="src\obj\food.h" />
     <ClInclude Include="src\obj\ghost.h" />
     <ClInclude Include="src\obj\pacman.h" />
     <ClInclude Include="src\obj\power.h" />

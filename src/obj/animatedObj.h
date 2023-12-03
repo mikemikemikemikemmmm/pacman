@@ -9,11 +9,14 @@ public:
 	AnimationData m_currentAnimation;
 	int m_currentFrameIndex = 0;
 	bool m_canMoveDoor = false;
+	Direction m_currentDirection;
+	int m_speed;
 	virtual void updatePosition() = 0;
-	void setCanMoveDoor(const bool& val);
-	void setSpriteXY(const SpriteXY& spriteXY);
 	void updateAnimation();
+	void setCanMoveDoor(const bool& val);
 	void setCurrentAnimation(const AnimationData& data);
+	void setCurDirection(const Direction& dir);
+	void setSpeed(const int& s);
 	AnimatedObj(
 		const Texture2D& sprite,
 		const AnimationData& curAnimation,
@@ -23,6 +26,6 @@ public:
 		const int& speed,
 		const Direction& curDir
 	);
-	virtual ~AnimatedObj() {};
+	virtual ~AnimatedObj() = default;
 	AnimatedObj() = delete;
 };

@@ -179,9 +179,8 @@ void GhostObj::setAnimationStatus(const AnimationStatus& nextStatus) {
 	setCurrentAnimation(animationData);
 }
 
-void GhostObj::drawSelf(const bool& needUpdate) {
-	const Vector2 positionVec2 = tranPosToVec2(m_pos + SPRITE_START_POS);
-	DrawTextureRec(m_sprite, m_rec, positionVec2, WHITE);
+void GhostObj::drawSelf(const bool& needUpdate,const Position& pos) {
+	executeDraw(pos);
 	if (needUpdate) {
 		updatePosition();
 		if (m_animateCounter >= ANIMATION_MAX_COUNTER) {

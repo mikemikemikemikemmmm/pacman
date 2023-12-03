@@ -5,28 +5,19 @@
 class BaseObj {
 public:
 	const Texture2D& m_sprite;
-	int m_speed;
-	SpriteXY m_spriteXY;
-	float m_spriteWidth = SPRITE_SIZE;
-	float m_spriteHieght = SPRITE_SIZE;
 	Position m_pos;
-	Direction  m_currentDirection;
-	Rectangle m_rec{
-		m_spriteXY.x,
-		m_spriteXY.y,
-		m_spriteWidth,
-		m_spriteHieght
-	};
-	virtual void drawSelf(const bool& needUpdate) = 0;
+	Position m_sprite_start_pos;
+	Rectangle m_rec;
+	virtual void drawSelf(const bool& needUpdate,const Position& position) = 0;
+	void executeDraw(const Position& pos);
 	void setPosition(const Position& pos);
-	void setCurDirection(const Direction& dir);
-	void setSpeed(const int& s);
+	void setSpriteSize(const float& width,const float& height);
+	void setSpriteXY(const SpriteXY& spriteXY);
+	void setSpriteStartPos();
 	BaseObj(
 		const Texture2D& sprite,
 		const Position& pos,
-		const SpriteXY& spriteXY,
-		const int& speed,
-		const Direction& currentDirection);
-	virtual ~BaseObj() {};
+		const SpriteXY& spriteXY);
+	virtual ~BaseObj() =default;
 	BaseObj() = delete;
 };

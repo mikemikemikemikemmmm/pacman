@@ -16,7 +16,7 @@ public:
 	const static AnimationDataMap m_animationDataMap;
 	const Position& getPacmanPos() const;
 	void setNextTurnDirection(const Direction& dir);
-	void drawSelf(const bool& needUpdate) override;
+	void drawSelf(const bool& needUpdate, const Position& pos) override;
 	PacmanObj(
 		const Position& pos,
 		const MapManager& mapManager,

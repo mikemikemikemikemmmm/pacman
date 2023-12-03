@@ -7,10 +7,6 @@ void AnimatedObj::setCanMoveDoor(const bool& val) {
 	m_canMoveDoor = val;
 }
 
-void AnimatedObj::setSpriteXY(const SpriteXY& spriteXY) {
-	m_rec.x = spriteXY.x;
-	m_rec.y = spriteXY.y;
-}
 
 void AnimatedObj::updateAnimation() {
 	m_currentFrameIndex += 1;
@@ -30,14 +26,32 @@ void AnimatedObj::setCurrentAnimation(const AnimationData& data) {
 	m_currentFrameIndex = 0;
 	setSpriteXY({ data.startSpriteX,data.startSpriteY });
 }
+void AnimatedObj::setCurDirection(const Direction& dir) {
+	m_currentDirection = dir;
+}
 
-AnimatedObj::AnimatedObj(const Texture2D& sprite, const AnimationData& curAnimation, const MapManager& mapManager, const Position& pos, const SpriteXY& spriteXY, const int& speed, const Direction& curDir) :
+void AnimatedObj::setSpeed(const int& s) {
+	if (s == m_speed) {
+		return;
+	}
+	m_speed = s;
+}
+
+AnimatedObj::AnimatedObj(
+	const Texture2D& sprite, 
+	const AnimationData& curAnimation, 
+	const MapManager& mapManager, 
+	const Position& pos, 
+	const SpriteXY& spriteXY, 
+	const int& speed, 
+	const Direction& curDir
+) :
 	m_currentAnimation(curAnimation),
 	m_mapManager(mapManager),
+	m_speed(speed),
+	m_currentDirection(curDir),
 	BaseObj(
 		sprite,
 		pos,
-		spriteXY,
-		speed,
-		curDir
+		spriteXY
 	) {}

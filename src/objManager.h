@@ -3,6 +3,7 @@
 #include<vector>
 #include<memory>
 #include<optional>
+#include<unordered_set>
 #include<cmath>
 #include<forward_list>
 #include "gameStatus.h"
@@ -11,6 +12,7 @@
 #include "./obj/wall.h"
 #include "./obj/power.h"
 #include "./obj/pacman.h"
+#include "./obj/food.h"
 #include "./obj/ghost.h"
 
 class ObjManager {
@@ -20,13 +22,19 @@ public:
 	GameStatusManager& m_gameStatusManager;
 	AudioManager& m_audioManager;
 	std::unique_ptr<GhostManager> m_ghostManager;
-	std::forward_list<PowerObj> m_powerList;
-	std::vector<WallObj> m_wallList;
 	PacmanObj m_pacman;
-	static bool checkTouchByTwoObj(const BaseObj& o1, const BaseObj& o2);
+	WallObj m_wall;
+	PowerObj m_power;
+	FoodObj m_food;
+	PositionSet m_wallPositionSet;
+	PositionSet m_powerPositionSet;
+	PositionSet m_foodPositionSet;
+
+	static bool checkTouchByTwoPosition(const Position& p1, const Position& p2);
 	void checkEvent();
 	void checkPacmanEatPower();
 	void checkPacmanMeetGhost();
+	void checkPacmanEatFood();
 	void drawAllObj();
 	void handleKeyPressed(const Direction& dir);
 	void handleGameOver();
@@ -36,8 +44,8 @@ public:
 		GameStatusManager& gameStatusManager,
 		const MapManager& mapManager,
 		const Texture2D& sprite,
-		const PacmanObj& pacman,
-		const std::vector<WallObj>& wallList,
-		const std::forward_list<PowerObj>& powerList
+		const PositionSet& wallPosSet,
+		const PositionSet& powerPosSet,
+		const PositionSet& foodPosSet
 	);
 };

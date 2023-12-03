@@ -39,7 +39,7 @@ void GhostManager::handlePacmanEatPower() {
 void GhostManager::drawAllGhost(const bool& needUpdate) {
 	for (auto& g : m_ghostList) {
 		handleGhostMoveStatus(*g);
-		g->drawSelf(needUpdate);
+		g->drawSelf(needUpdate,g->m_pos);
 	}
 }
 

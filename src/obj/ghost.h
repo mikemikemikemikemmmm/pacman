@@ -26,7 +26,7 @@ public:
 	void setTargetPos(const Position& pos);
 	void setMoveStatus(const MoveStatus& nextStatus);;
 	void setAnimationStatus(const AnimationStatus& nextStatus);;
-	void drawSelf(const bool& needUpdate) override;;
+	void drawSelf(const bool& needUpdate,const Position& pos) override;
 	GhostObj(
 		const GhostColor& color,
 		const MapManager& mapManager,

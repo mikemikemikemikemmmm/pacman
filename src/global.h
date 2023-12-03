@@ -2,6 +2,7 @@
 #include "../lib/raylib/include/raylib.h"
 #include <array>
 #include <unordered_map>
+#include <unordered_set>
 #include <string>
 #include <iostream>
 #include <future>
@@ -11,8 +12,6 @@
 //system
 constexpr int CELL_SIZE = 30;
 constexpr int SPRITE_SIZE = 20;
-constexpr int SPRITE_START_X = ((CELL_SIZE - SPRITE_SIZE) / 2);
-constexpr int SPRITE_START_Y = ((CELL_SIZE - SPRITE_SIZE) / 2);
 constexpr int MAP_HEIGHT = 30;
 constexpr int MAP_WIDTH = 27;
 constexpr int MAP_MAX_X = MAP_WIDTH * CELL_SIZE;
@@ -49,6 +48,8 @@ constexpr Direction directionLeft{ -1,0 };
 constexpr Direction directionStay{ 0,0 };
 const std::array<Direction, 4> fourDirectionArray{ directionUp, directionDown, directionRight, directionLeft };
 
+
+//position
 struct Position {
 	int x;
 	int y;
@@ -64,7 +65,13 @@ struct Position {
 	Position flipByYAxis(const Position& axisPos)const;
 	Position flipByXAxis(const Position& axisPos)const;
 };
-constexpr Position SPRITE_START_POS = { SPRITE_START_X ,SPRITE_START_Y };
+
+struct PositionHash {
+	std::size_t operator()(const Position& p) const {
+		return std::hash<int>()(p.x) ^ std::hash<int>()(p.y);
+	}
+};
+typedef std::unordered_set<Position, PositionHash> PositionSet;
 //map
 class MapIndex {
 public:
