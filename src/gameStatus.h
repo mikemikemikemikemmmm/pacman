@@ -5,12 +5,11 @@
 class GameStatusManager {
 public:
 	bool isPlaying() const;
-	bool isPaused() const;
 	bool isStart() const;
 	bool isGameOver() const;
 	bool isGameWin() const;
 	enum class GameStatus {
-		Playing, Starting, Pause, Gameover, Win
+		Playing, Starting, Gameover, Win
 	};
 	GameStatus getGameStatus() const;
 	void setGameStatus(const GameStatus& s);

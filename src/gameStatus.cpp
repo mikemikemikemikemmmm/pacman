@@ -4,9 +4,6 @@ bool GameStatusManager::isPlaying() const {
 	return m_gameStatus == GameStatus::Playing;
 }
 
-bool GameStatusManager::isPaused() const {
-	return m_gameStatus == GameStatus::Pause;
-}
 
 bool GameStatusManager::isStart() const {
 	return m_gameStatus == GameStatus::Starting;

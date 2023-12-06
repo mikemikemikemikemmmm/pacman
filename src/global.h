@@ -14,17 +14,19 @@ constexpr int CELL_SIZE = 30;
 constexpr int SPRITE_SIZE = 20;
 constexpr int MAP_HEIGHT = 30;
 constexpr int MAP_WIDTH = 27;
+constexpr int MAP_START_Y = 0;
+constexpr int MAP_START_X = 0;
 constexpr int MAP_MAX_X = MAP_WIDTH * CELL_SIZE;
 constexpr int MAP_MAX_Y = MAP_HEIGHT * CELL_SIZE;
-constexpr int SCREEN_HEIGHT = (MAP_HEIGHT - 1) * CELL_SIZE;
-constexpr int SCREEN_WIDTH = MAP_WIDTH * CELL_SIZE;
+constexpr int SCREEN_HEIGHT = MAP_START_Y+(MAP_HEIGHT - 1) * CELL_SIZE;
+constexpr int SCREEN_WIDTH = MAP_START_X+MAP_WIDTH * CELL_SIZE;
 constexpr int TARGET_FPS = 60;
 constexpr int FRAME_COST_MILLSECOND = 30;
 constexpr int TEXT_SIZE = 50;
 constexpr int GAME_START_READY_WAIT_SECOND = 4;
 //speed , must be divisible by CELL_SIZE
 constexpr int PACMAN_SPEED = 6;
-constexpr int GHOST_SPEED = 5;
+constexpr int GHOST_SPEED = 6;
 constexpr int OBJ_MEET_MAX_DISTANCE = GHOST_SPEED + PACMAN_SPEED;
 
 //direction
@@ -72,6 +74,7 @@ struct PositionHash {
 	}
 };
 typedef std::unordered_set<Position, PositionHash> PositionSet;
+constexpr Position MAP_START_POS{ MAP_START_X,MAP_START_Y };
 //map
 class MapIndex {
 public:

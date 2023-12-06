@@ -5,6 +5,7 @@ Game::Game() {
 }
 void Game::initGameWindow() {
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "pacman");
+	SetWindowMinSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	SetTargetFPS(TARGET_FPS);
 	m_sprite = LoadTexture("resources/pacman3.png");
 	font = LoadFont("resources/font2.ttf");
@@ -13,7 +14,18 @@ void Game::initGameWindow() {
 void Game::initStatus() {
 	m_previousTime = std::chrono::steady_clock::now();
 	m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Starting);
-	m_audioManager.stopPlayingMusic();
+	m_audioManager.cleanKeepPlayList();
+	m_audioManager.stopPlayingAllMusic();
+}
+void Game::handlePlayMusic(const long long& lag)
+{
+	if (m_gameStatusManager.isPlaying()) {
+		m_audioManager.playKeepMusic(lag);
+		m_audioManager.playMusic("background");
+	}
+	else {
+		m_audioManager.stopPlayingMusic("background");
+	}
 }
 void Game::initObj() {
 	const char wallChar = m_mapManager.tranMapTypeToChar(MapCellType::Wall);
@@ -22,12 +34,14 @@ void Game::initObj() {
 	PositionSet foodPosSet;
 	PositionSet wallPosSet;
 	PositionSet powerPosSet;
-	for (int row = 0; row < m_mapManager.m_map.size(); row++) {
-		for (int col = 0; col < m_mapManager.m_map[0].size(); col++) {
+	const int mapRow = static_cast<int>(m_mapManager.m_map.size());
+	const int mapCol = static_cast<int>(m_mapManager.m_map[0].size());
+	for (int row = 0; row < mapRow; row++) {
+		for (int col = 0; col < mapCol; col++) {
 			const int x = col * CELL_SIZE;
 			const int y = row * CELL_SIZE;
 			if (m_mapManager.m_map[row][col] == wallChar) {
-				wallPosSet.emplace(Position{x, y});
+				wallPosSet.emplace(Position{ x, y });
 			}
 			else if (m_mapManager.m_map[row][col] == powerChar) {
 				powerPosSet.emplace(Position{ x, y });
@@ -61,14 +75,6 @@ void Game::handleInput() {
 		else if (IsKeyPressed(KEY_DOWN)) {
 			m_objManager->handleKeyPressed(directionDown);
 		}
-		else if (IsKeyPressed(KEY_ENTER)) {
-			m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Pause);
-		}
-	}
-	else if (m_gameStatusManager.isPaused()) {
-		if (IsKeyPressed(KEY_ENTER)) {
-			m_gameStatusManager.setGameStatus(GameStatusManager::GameStatus::Playing);
-		}
 	}
 	else if (m_gameStatusManager.isGameWin() || m_gameStatusManager.isGameOver()) {
 		if (IsKeyPressed(KEY_ENTER)) {
@@ -79,9 +85,6 @@ void Game::handleInput() {
 void Game::handleRenderText() {
 	if (m_gameStatusManager.isStart()) {
 		renderText({ "READY!" });
-	}
-	else if (m_gameStatusManager.isPaused()) {
-		renderText({ "PAUSED!","","PRESS ENTER","","TO PLAY" });
 	}
 	else if (m_gameStatusManager.isGameWin()) {
 		renderText({ "YOU WIN!","","PRESS ENTER TO START","", "A NEW GAME" });
@@ -104,8 +107,8 @@ void Game::handleGameLoop() {
 			std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - m_previousTime).count();
 		m_lag += delta_time;
 		m_previousTime += std::chrono::milliseconds(delta_time);
-
 		while (m_lag >= FRAME_COST_MILLSECOND) {
+			handlePlayMusic(m_lag);
 			m_lag = 0;
 			handleInput();
 			BeginDrawing();
@@ -129,7 +132,7 @@ void Game::handleNewGame() {
 	initObj();
 	handleGameLoop();
 }
-void Game::renderText(const std::vector<std::string> contentList) {
+void Game::renderText(const std::vector<std::string>& contentList) {
 	const int contentListSize = static_cast<int>(contentList.size());
 	for (int i = 0; i < contentListSize; i++) {
 		DrawTextEx(font, contentList[i].c_str(), tranPosToVec2({

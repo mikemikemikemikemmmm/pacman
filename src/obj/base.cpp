@@ -2,7 +2,7 @@
 
 void BaseObj::executeDraw(const Position& pos)
 {
-	const Vector2 positionVec2 = tranPosToVec2(pos + m_sprite_start_pos);
+	const Vector2 positionVec2 = tranPosToVec2(pos + m_sprite_start_pos +MAP_START_POS);
 	DrawTextureRec(m_sprite, m_rec, positionVec2, WHITE);
 }
 

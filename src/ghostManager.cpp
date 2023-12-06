@@ -4,7 +4,7 @@ void GhostManager::handlePacmanEatPower() {
 	auto targetGhostPtrList = std::vector<GhostObj*>();
 	for (auto& g : m_ghostList) {
 		if (g->m_animationStatus != GhostObj::AnimationStatus::die &&
-			g->m_moveStatus != GhostObj::MoveStatus::stayAtStartPos&&
+			g->m_moveStatus != GhostObj::MoveStatus::stayAtStartPos &&
 			g->m_moveStatus != GhostObj::MoveStatus::goOutDoor
 			) {
 			targetGhostPtrList.push_back(g);
@@ -39,13 +39,12 @@ void GhostManager::handlePacmanEatPower() {
 void GhostManager::drawAllGhost(const bool& needUpdate) {
 	for (auto& g : m_ghostList) {
 		handleGhostMoveStatus(*g);
-		g->drawSelf(needUpdate,g->m_pos);
+		g->drawSelf(needUpdate, g->m_pos);
 	}
 }
 
 void GhostManager::setGhostTargetWhenChase(GhostObj& ghost) {
 	const Position& pacmanPos = m_pacman.getPacmanPos();
-	const Position pacmanSymmetricPos = MAP_CENTER_POS * 2 - pacmanPos;
 	switch (ghost.m_color) {
 	case GhostObj::GhostColor::blinky: {
 		ghost.setTargetPos(pacmanPos);
@@ -57,11 +56,13 @@ void GhostManager::setGhostTargetWhenChase(GhostObj& ghost) {
 		break;
 	}
 	case GhostObj::GhostColor::inky: {
-		ghost.setTargetPos(pacmanPos+m_pacman.m_currentDirection * 5);
+		const Position pacmanSymmetricPos = MAP_CENTER_POS * 2 - pacmanPos;
+		ghost.setTargetPos(pacmanSymmetricPos.flipByXAxis(MAP_CENTER_POS));
 		break;
 	}
 	case GhostObj::GhostColor::clyde: {
-		ghost.setTargetPos(pacmanPos + m_pacman.m_currentDirection * -5);
+		const Position pacmanSymmetricPos = MAP_CENTER_POS * 2 - pacmanPos;
+		ghost.setTargetPos(pacmanSymmetricPos.flipByYAxis(MAP_CENTER_POS));
 		break;
 	}
 	}

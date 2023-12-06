@@ -35,6 +35,7 @@ public:
 	void checkPacmanEatPower();
 	void checkPacmanMeetGhost();
 	void checkPacmanEatFood();
+	void checkGameWin();
 	void drawAllObj();
 	void handleKeyPressed(const Direction& dir);
 	void handleGameOver();
@@ -44,8 +45,8 @@ public:
 		GameStatusManager& gameStatusManager,
 		const MapManager& mapManager,
 		const Texture2D& sprite,
-		const PositionSet& wallPosSet,
-		const PositionSet& powerPosSet,
-		const PositionSet& foodPosSet
+		PositionSet& wallPosSet,
+		PositionSet& powerPosSet,
+		PositionSet& foodPosSet
 	);
 };
