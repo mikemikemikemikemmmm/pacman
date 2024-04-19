@@ -5,7 +5,7 @@ Game::Game() {
 }
 void Game::initGameWindow() {
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "pacman");
-	SetWindowMinSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+	SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	SetTargetFPS(TARGET_FPS);
 	m_sprite = LoadTexture("resources/pacman3.png");
 	font = LoadFont("resources/font2.ttf");
