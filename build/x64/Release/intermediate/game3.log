@@ -1,0 +1,36 @@
+﻿  audioManager.cpp
+  game.cpp
+  game3.cpp
+  gameStatus.cpp
+  ghostManager.cpp
+  global.cpp
+  mapManager.cpp
+  objManager.cpp
+  objManager.h
+  animatedObj.cpp
+  animatedObj.h
+  base.cpp
+  food.cpp
+  ghost.cpp
+  pacman.cpp
+  power.cpp
+  wall.cpp
+  utils.cpp
+.\build\x64\Release\intermediate\objManager.obj : warning LNK4042: 指定物件超過一次，已忽略多餘的部分
+.\build\x64\Release\intermediate\animatedObj.obj : warning LNK4042: 指定物件超過一次，已忽略多餘的部分
+  正在產生程式碼
+  Previous IPDB not found, fall back to full compilation.
+  All 1523 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  已完成程式碼產生
+  game3.vcxproj -> C:\Users\mikem\Downloads\111111\pacman\build\x64\Release\out\game3.exe
+  .\resources\background.wav
+  .\resources\eatFood.wav
+  .\resources\eatGhost.wav
+  .\resources\eatPower.wav
+  .\resources\font2.TTF
+  .\resources\gameOver.wav
+  .\resources\gameStart.wav
+  .\resources\gameWin.wav
+  .\resources\pacman.png
+  .\resources\pacman3.png
+  已複製 10 個檔案
